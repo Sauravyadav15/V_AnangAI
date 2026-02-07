@@ -14,6 +14,7 @@ export default function PartnerPage() {
   const [form, setForm] = useState({
     username: '',
     email: '',
+    password: '',
     businessName: '',
     businessType: '',
     businessDescription: '',
@@ -33,6 +34,7 @@ export default function PartnerPage() {
     setForm({
       username: '',
       email: '',
+      password: '',
       businessName: '',
       businessType: '',
       businessDescription: '',
@@ -94,6 +96,21 @@ export default function PartnerPage() {
                     required
                     className={inputBase}
                     placeholder="you@example.com"
+                  />
+                </label>
+                <label className="block">
+                  <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                    <Lock className="w-4 h-4" /> Create Password
+                  </span>
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => update('password', e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    className={inputBase}
+                    placeholder="Choose a password for later login"
                   />
                 </label>
                 <label className="block">
