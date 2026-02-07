@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Mail, Lock, LogIn } from 'lucide-react'
-import { useApp } from '../context/AppContext'
+import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 import Layout, { pageVariants, pageTransition } from '../components/Layout'
 
 const inputBase =
@@ -13,22 +14,30 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = useApp()
+  const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const message = location.state?.message
+
+  useEffect(() => {
+    if (message) toast.success(message)
+  }, [message])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      const result = await login(email.trim(), password)
-      if (result.success) {
-        navigate('/')
-        return
-      }
-      setError(result.error ?? 'Login failed.')
+      await login(email.trim(), password)
+      navigate('/dashboard', { replace: true })
     } catch (err) {
-      setError(err.message ?? 'Something went wrong.')
+      const msg = err.message ?? 'Login failed.'
+      setError(msg)
+      if (err.message?.toLowerCase().includes('invalid') || err.message === 'Invalid credentials') {
+        toast.error('Invalid Credentials')
+      } else {
+        toast.error(msg)
+      }
     } finally {
       setLoading(false)
     }
@@ -48,7 +57,7 @@ export default function LoginPage() {
           Login
         </h1>
         <p className="text-slate-deep/70 mb-8">
-          Sign in with your email to access your account.
+          Sign in with your email to access your dashboard.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -107,7 +116,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-deep/70">
-          All pages remain accessible without logging in. Login is optional for personalized features.
+          New partner? Submit an application on Get Featured, then log in here to track your status.
         </p>
         <p className="mt-2 text-center">
           <Link to="/" className="text-sage font-medium hover:underline">

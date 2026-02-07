@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion'
 
-const tabs = [
+const defaultTabs = [
   { id: 'restaurants', label: 'Local Restaurants' },
   { id: 'places', label: 'Places to Visit' },
   { id: 'activities', label: 'Real-time Activities' },
   { id: 'artifacts', label: 'Local Artifacts' },
 ]
 
-export default function TabNavigation({ activeTab, onTabChange }) {
+export default function TabNavigation({ activeTab, onTabChange, tabs = defaultTabs }) {
   return (
     <nav
       className="flex flex-wrap gap-2 md:gap-3 mb-8"

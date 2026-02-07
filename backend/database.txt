@@ -1,0 +1,59 @@
+{
+  "users": [
+    {
+      "email": "demo@kingston.local",
+      "password": "demo123",
+      "name": "Demo Partner",
+      "progress": 7,
+      "is_verified": true,
+      "business_name": "Downtown Kitchen",
+      "business_description": "Farm-to-table dining with seasonal local produce from Kingston area.",
+      "category": "Restaurant",
+      "address": "Kingston Downtown"
+    },
+    {
+      "email": "cafe@kingston.local",
+      "password": "demo123",
+      "name": "Cafe Owner",
+      "progress": 7,
+      "is_verified": true,
+      "business_name": "Sage & Stone Caf\u00e9",
+      "business_description": "Organic coffee and pastries with a focus on regional ingredients.",
+      "category": "Cafe",
+      "address": "Visit Kingston"
+    },
+    {
+      "email": "market@kingston.local",
+      "password": "demo123",
+      "name": "Market Manager",
+      "progress": 7,
+      "is_verified": true,
+      "business_name": "Kingston Farmers Market",
+      "business_description": "Weekly market with local produce, crafts, and live music.",
+      "category": "Market",
+      "address": "Market Square"
+    },
+    {
+      "email": "test@gmail.com",
+      "password": "test123",
+      "name": "Test User",
+      "progress": 6,
+      "is_verified": false,
+      "business_name": "",
+      "business_description": "",
+      "category": "",
+      "address": ""
+    },
+    {
+      "email": "saurav@gmail.com",
+      "password": "1234",
+      "name": "saurav",
+      "progress": 1,
+      "is_verified": false,
+      "business_name": "sofa",
+      "business_description": "dlfjsdjflsjajflsjdviswasrand",
+      "category": "Producer",
+      "address": ""
+    }
+  ]
+}

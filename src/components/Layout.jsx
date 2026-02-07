@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { Menu, LogIn, LogOut } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 import Sidebar from './Sidebar'
 
 const pageVariants = {
@@ -13,7 +14,8 @@ const pageVariants = {
 const pageTransition = { type: 'tween', duration: 0.3, ease: 'easeOut' }
 
 export default function Layout({ children }) {
-  const { toggleSidebar, user, logout } = useApp()
+  const { toggleSidebar } = useApp()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {

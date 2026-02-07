@@ -1,18 +1,38 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Layout, { pageVariants, pageTransition } from '../components/Layout'
 import TabNavigation from '../components/TabNavigation'
 import ServiceCard from '../components/ServiceCard'
-// HOOK_BACKEND_HERE: Replace with API fetch when web-scraped JSON is available
-import servicesData from '../data/services.json'
+import { getVerifiedBusinesses } from '../lib/api'
+
+const VERIFIED_TABS = [
+  { id: 'all', label: 'All' },
+  { id: 'Restaurant', label: 'Restaurant' },
+  { id: 'Cafe', label: 'Cafe' },
+  { id: 'Market', label: 'Market' },
+  { id: 'Other', label: 'Other' },
+]
 
 export default function DiscoveryPage() {
-  const [activeTab, setActiveTab] = useState('restaurants')
+  const [activeTab, setActiveTab] = useState('all')
+  const [businesses, setBusinesses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    getVerifiedBusinesses()
+      .then((data) => setBusinesses(data.businesses ?? []))
+      .catch((e) => {
+        setError(e.message)
+        setBusinesses([])
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   const items = useMemo(() => {
-    const key = activeTab
-    return servicesData[key] ?? []
-  }, [activeTab])
+    if (activeTab === 'all') return businesses
+    return businesses.filter((b) => (b.category || '').toLowerCase() === activeTab.toLowerCase())
+  }, [businesses, activeTab])
 
   return (
     <Layout>
@@ -28,19 +48,27 @@ export default function DiscoveryPage() {
           Kingston Discovery
         </h1>
         <p className="text-slate-deep/70 mb-8">
-          Local restaurants, places to visit, real-time activities, and local artifacts.
+          Verified local businesses — restaurants, cafés, markets and more.
         </p>
 
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} tabs={VERIFIED_TABS} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {items.map((item) => (
-            <ServiceCard key={item.id} item={item} />
-          ))}
-        </div>
-        {items.length === 0 && (
+        {loading && (
+          <p className="text-slate-deep/60 text-center py-12">Loading verified businesses…</p>
+        )}
+        {error && (
+          <p className="text-red-600 text-center py-4">Could not load businesses. Make sure the API is running.</p>
+        )}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {items.map((item) => (
+              <ServiceCard key={item.id} item={item} />
+            ))}
+          </div>
+        )}
+        {!loading && !error && items.length === 0 && (
           <p className="text-slate-deep/60 text-center py-12">
-            No items in this category yet. HOOK_BACKEND_HERE for live data.
+            No verified businesses in this category yet.
           </p>
         )}
       </motion.div>

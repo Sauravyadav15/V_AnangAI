@@ -1,12 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { NavLink } from 'react-router-dom'
-import { Home, Compass, Star, X } from 'lucide-react'
+import { Home, Compass, Star, LayoutDashboard, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 
 const navItems = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/discovery', label: 'Explore Services', icon: Compass },
   { to: '/partner', label: 'Get Featured', icon: Star },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
 ]
 
 export default function Sidebar() {

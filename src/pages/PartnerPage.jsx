@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import Layout, { pageVariants, pageTransition } from '../components/Layout'
 import { Check, Building2, User, Mail, Lock, FileText, Phone, Loader2 } from 'lucide-react'
+import { registerPartner } from '../lib/api'
 
 const BUSINESS_TYPES = ['Cafe', 'Restaurant', 'Producer', 'Market', 'Other']
 
@@ -9,8 +12,11 @@ const inputBase =
   'w-full rounded-[var(--radius-xl)] border border-[var(--color-glass-border)] bg-white/80 px-4 py-3 text-slate-deep placeholder:text-slate-deep/50 focus:outline-none focus:ring-2 focus:ring-sage/30 focus:border-sage transition-colors'
 
 export default function PartnerPage() {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -23,9 +29,19 @@ export default function PartnerPage() {
 
   const update = (field, value) => setForm((f) => ({ ...f, [field]: value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setShowSuccessModal(true)
+    setSubmitError('')
+    setSubmitting(true)
+    try {
+      await registerPartner(form)
+      setShowSuccessModal(true)
+    } catch (err) {
+      setSubmitError(err.message ?? 'Could not save application.')
+      toast.error(err.message ?? 'Could not save application.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleCloseModal = () => {
@@ -40,6 +56,7 @@ export default function PartnerPage() {
       businessDescription: '',
       contact: '',
     })
+    navigate('/login', { state: { message: 'Application filed! Please log in to track your status.' } })
   }
 
   const nextStep = () => setStep((s) => Math.min(s + 1, 3))
@@ -191,11 +208,16 @@ export default function PartnerPage() {
             )}
           </AnimatePresence>
 
+          {submitError && (
+            <div role="alert" className="rounded-[var(--radius-xl)] bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+              {submitError}
+            </div>
+          )}
           <div className="flex items-center justify-between pt-4">
             <button
               type="button"
               onClick={prevStep}
-              disabled={step === 1}
+              disabled={step === 1 || submitting}
               className="px-4 py-2 rounded-[var(--radius-xl)] text-slate-deep hover:bg-white/60 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Back
@@ -211,9 +233,17 @@ export default function PartnerPage() {
             ) : (
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-[var(--radius-xl)] bg-sage text-white hover:bg-sage-light flex items-center gap-2"
+                disabled={submitting}
+                className="px-5 py-2.5 rounded-[var(--radius-xl)] bg-sage text-white hover:bg-sage-light flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Submit
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving…
+                  </>
+                ) : (
+                  'Submit'
+                )}
               </button>
             )}
           </div>
@@ -283,7 +313,7 @@ export default function PartnerPage() {
                 Application received
               </h3>
               <p className="text-slate-deep/80 text-center text-sm mb-6">
-                Redirecting to City of Kingston Permit Portal...
+                Please log in to track your application status.
               </p>
               <div className="flex justify-center">
                 <Loader2 className="w-6 h-6 text-sage animate-spin" />
