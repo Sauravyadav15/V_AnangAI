@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Layout, { pageVariants, pageTransition } from '../components/Layout'
-import { Check, Building2, User, Mail, FileText, Phone, Loader2 } from 'lucide-react'
+import { Check, Building2, User, Mail, Lock, FileText, Phone, Loader2 } from 'lucide-react'
 
 const BUSINESS_TYPES = ['Cafe', 'Restaurant', 'Producer', 'Market', 'Other']
 
