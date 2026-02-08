@@ -1,3 +1,26 @@
 {
-  "applications": []
+  "applications": [
+    {
+      "id": "83bbcf5c-fe0d-4e98-b4d5-7e887b46a836",
+      "name": "User",
+      "email": "testuser@gmail.com",
+      "biz_name": "UserBusiness",
+      "biz_cat": "Retail",
+      "biz_desc": "Sample User Business",
+      "contact": "contact",
+      "license_url": "license_testuser_gmail_com_a3bee25b.jpg",
+      "status": "approved"
+    },
+    {
+      "id": "318d8679-9913-4f1f-950b-cbbe29ce3f90",
+      "name": "User2",
+      "email": "test1user@gmail.com",
+      "biz_name": "UserBusiness2",
+      "biz_cat": "Producer",
+      "biz_desc": "Sample Business 2",
+      "contact": "contact 2",
+      "license_url": "license_test1user_gmail_com_c286cc86.jpg",
+      "status": "pending"
+    }
+  ]
 }

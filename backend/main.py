@@ -1,17 +1,27 @@
 """
-KingstonAI Partner Portal API - Dual-database: applications.txt (business) + database.txt (auth).
+AnangAI Civic Portal API - applications.txt (Get Featured) + Admin-only auth.
 """
 import hashlib
 import json
 import shutil
+import uuid
 from pathlib import Path
 
-from fastapi import Body, FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import Body, Depends, FastAPI, File, Form, Header, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from router import ask, discover_data_files, load_data, split_food_entries, split_place_entries, parse_food_entry, parse_place_entry, parse_event_entry
 
-app = FastAPI(title="AnangAI Partner API")
+app = FastAPI(title="AnangAI Civic Portal API")
+
+# Hardcoded Admin credentials (backend check only). In production use env vars.
+# List of (email_lower, password) that can access Founder's Portal.
+ADMINS = [
+    ("admin@anangai.com", "anang_admin_2024"),
+    ("saurav@gmail.com", "saurav@qhacks"),
+]
+ADMIN_TOKEN = "anang_founder_portal_token"
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +35,9 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database.txt"
+# Get Featured submissions (name, email, business, status, etc.):
 APP_PATH = BASE_DIR / "applications.txt"
+# Uploaded license/identity documents from applications:
 UPLOADS_DIR = BASE_DIR / "uploads"
 PASSWORD_SALT = "anang_ai_partner_2024"
 
@@ -63,6 +75,12 @@ class RegisterBody(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str
+
+
+class ApplicationIdBody(BaseModel):
+    """Body for admin application approve/reject: id or email."""
+    id: str | None = None
+    email: str | None = None
 
 
 def load_db():
@@ -106,6 +124,16 @@ def get_application_by_email(email: str):
     return None, data
 
 
+def require_admin(authorization: str | None = Header(None)):
+    """Dependency: require valid admin token in Authorization: Bearer <token>."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Admin authentication required")
+    token = authorization.replace("Bearer ", "").strip()
+    if token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid admin token")
+    return True
+
+
 def ensure_user(email: str, data: dict):
     users = data.get("users", [])
     for i, u in enumerate(users):
@@ -127,6 +155,7 @@ def ensure_user(email: str, data: dict):
 
 @app.post("/api/submit-application")
 async def submit_application(
+    name: str = Form(""),
     email: str = Form(...),
     businessName: str = Form(""),
     businessType: str = Form(""),
@@ -135,23 +164,22 @@ async def submit_application(
     license_file: UploadFile = File(None),
 ):
     """
-    Guest submission: business details + optional license file. Saves ONLY to applications.txt.
-    No password. Use /api/finalize-account later to create auth account.
+    Public "Get Featured" submission. Saves to applications.txt with status pending.
     """
     email = (email or "").strip()
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
     apps_data = load_applications()
     for a in apps_data.get("applications", []):
-        if a.get("email") == email:
-            raise HTTPException(status_code=409, detail="Application already submitted for this email. Create your password on the success page.")
+        if (a.get("email") or "").strip().lower() == email.lower():
+            raise HTTPException(status_code=409, detail="An application for this email already exists.")
     license_url = ""
     safe_email = email.replace("@", "_").replace(".", "_")
     if license_file and license_file.filename:
         suffix = Path(license_file.filename).suffix.lower()
         if suffix not in ALLOWED_EXTENSIONS:
             raise HTTPException(400, f"License file: allowed types {', '.join(ALLOWED_EXTENSIONS)}")
-        dest_name = f"license_{safe_email}{suffix}"
+        dest_name = f"license_{safe_email}_{uuid.uuid4().hex[:8]}{suffix}"
         dest_path = UPLOADS_DIR / dest_name
         try:
             with open(dest_path, "wb") as f:
@@ -159,8 +187,11 @@ async def submit_application(
         except Exception as e:
             raise HTTPException(500, f"Save failed: {e}")
         license_url = dest_name
+    app_id = str(uuid.uuid4())
     apps = apps_data.get("applications", [])
     apps.append({
+        "id": app_id,
+        "name": (name or "").strip(),
         "email": email,
         "biz_name": (businessName or "").strip(),
         "biz_cat": (businessType or "").strip(),
@@ -171,7 +202,80 @@ async def submit_application(
     })
     apps_data["applications"] = apps
     save_applications(apps_data)
-    return {"email": email, "message": "Application received. Create your password on the next page to track your roadmap."}
+    return {"id": app_id, "email": email, "message": "Application submitted. You will hear from admin@anangai.com regarding verification."}
+
+
+# ---------- Admin (Founder's Portal) ----------
+@app.post("/api/admin/login")
+def admin_login(body: LoginBody):
+    """Hardcoded admin auth. Returns token for use in Authorization header."""
+    email = (body.email or "").strip().lower()
+    password = body.password or ""
+    if (email, password) not in ADMINS:
+        raise HTTPException(status_code=401, detail="Invalid admin credentials")
+    return {"token": ADMIN_TOKEN}
+
+
+@app.get("/api/admin/applications")
+def admin_list_applications(_: bool = Depends(require_admin)):
+    """Return all applications from applications.txt (admin only)."""
+    data = load_applications()
+    return data
+
+
+def _find_application(data, app_id: str | None, email: str | None):
+    """Return (index, app) or (None, None)."""
+    apps = data.get("applications", [])
+    email_lower = (email or "").strip().lower()
+    for i, a in enumerate(apps):
+        if app_id and a.get("id") == app_id:
+            return i, a
+        if email_lower and (a.get("email") or "").strip().lower() == email_lower:
+            return i, a
+    return None, None
+
+
+@app.post("/api/admin/applications/approve")
+def admin_approve_application(body: ApplicationIdBody, _: bool = Depends(require_admin)):
+    """Set application status to approved (admin only). Body: { "id": "..." } or { "email": "..." }."""
+    app_id = (body.id or "").strip() or None
+    email = (body.email or "").strip() or None
+    if not app_id and not email:
+        raise HTTPException(status_code=400, detail="Application id or email required")
+    data = load_applications()
+    i, a = _find_application(data, app_id, email)
+    if i is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    a["status"] = "approved"
+    save_applications(data)
+    return {"id": a.get("id"), "status": "approved"}
+
+
+@app.post("/api/admin/applications/reject")
+def admin_reject_application(body: ApplicationIdBody, _: bool = Depends(require_admin)):
+    """Set application status to rejected (admin only). Body: { "id": "..." } or { "email": "..." }."""
+    app_id = (body.id or "").strip() or None
+    email = (body.email or "").strip() or None
+    if not app_id and not email:
+        raise HTTPException(status_code=400, detail="Application id or email required")
+    data = load_applications()
+    i, a = _find_application(data, app_id, email)
+    if i is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    a["status"] = "rejected"
+    save_applications(data)
+    return {"id": a.get("id"), "status": "rejected"}
+
+
+@app.get("/api/uploads/{filename}")
+def serve_upload(filename: str):
+    """Serve an uploaded file (e.g. license document). Filename must be safe (no path traversal)."""
+    if ".." in filename or "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    path = UPLOADS_DIR / filename
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(path, filename=filename)
 
 
 @app.post("/api/finalize-account")

@@ -1,13 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { NavLink } from 'react-router-dom'
-import { Home, Compass, Star, LayoutDashboard, X } from 'lucide-react'
+import { Home, Compass, Star, FileText, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 
 const navItems = [
   { to: '/', label: 'Home', icon: Home },
-  { to: '/discovery', label: 'Explore Services', icon: Compass },
-  { to: '/partner', label: 'Get Featured', icon: Star },
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/discovery', label: 'Explore', icon: Compass },
+  { to: '/get-featured', label: 'Get Featured', icon: Star },
+  { to: '/licensing-info', label: 'Licensing Info', icon: FileText },
 ]
 
 export default function Sidebar() {
@@ -35,7 +35,7 @@ export default function Sidebar() {
           >
             <div className="p-6 flex items-center justify-between border-b border-[var(--color-glass-border)]">
               <h2 className="font-[var(--font-serif)] text-xl font-bold text-slate-deep">
-                Kingston Hub
+                Civic Guide
               </h2>
               <button
                 type="button"

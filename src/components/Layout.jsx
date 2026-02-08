@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import { Menu, LogIn, LogOut } from 'lucide-react'
+import { Menu, LogIn, LogOut, Shield } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { useAuth } from '../context/AuthContext'
+import { useAdminAuth } from '../context/AdminAuthContext'
 import Sidebar from './Sidebar'
 
 const logoImg = new URL('../../frontendimages/ANANG_logo.png', import.meta.url).href
@@ -17,10 +17,10 @@ const pageTransition = { type: 'tween', duration: 0.3, ease: 'easeOut' }
 
 export default function Layout({ children }) {
   const { toggleSidebar } = useApp()
-  const { user, logout } = useAuth()
+  const { isAdmin, logout } = useAdminAuth()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
+  const handleAdminLogout = () => {
     logout()
     navigate('/')
   }
@@ -48,22 +48,22 @@ export default function Layout({ children }) {
           <span>AnangAI</span>
         </Link>
         <div className="flex items-center gap-2">
-          {user ? (
+          {isAdmin ? (
             <button
               type="button"
-              onClick={handleLogout}
+              onClick={handleAdminLogout}
               className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xl)] text-slate-deep hover:bg-white/60 transition-colors text-sm font-medium"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              Founder&apos;s Portal (Log out)
             </button>
           ) : (
             <Link
-              to="/login"
+              to="/admin/login"
               className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xl)] bg-sage text-white hover:bg-sage-light transition-colors text-sm font-medium"
             >
-              <LogIn className="w-4 h-4" />
-              Login
+              <Shield className="w-4 h-4" />
+              Admin Login
             </Link>
           )}
         </div>

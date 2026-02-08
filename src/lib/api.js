@@ -2,6 +2,7 @@
 const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 const STORAGE_KEY = 'kingston_user'
+export const ADMIN_TOKEN_KEY = 'anang_admin_token'
 
 export function getStoredUser() {
   try {
@@ -17,6 +18,15 @@ export function getStoredUser() {
 export function setStoredUser(user) {
   if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
   else localStorage.removeItem(STORAGE_KEY)
+}
+
+export function getStoredAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_KEY)
+}
+
+export function setStoredAdminToken(token) {
+  if (token) localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  else localStorage.removeItem(ADMIN_TOKEN_KEY)
 }
 
 /**
@@ -57,11 +67,11 @@ export async function loginApi(email, password) {
 }
 
 /**
- * POST /api/submit-application - business details + optional license file. Saves to applications.txt only.
- * No password. Redirect to /success to finalize account.
+ * POST /api/submit-application - Get Featured: name, email, business details + optional license file.
  */
 export async function submitApplication(data, licenseFile = null) {
   const form = new FormData()
+  form.append('name', (data.name ?? '').trim())
   form.append('email', (data.email ?? '').trim())
   form.append('businessName', data.businessName ?? '')
   form.append('businessType', data.businessType ?? '')
@@ -73,10 +83,72 @@ export async function submitApplication(data, licenseFile = null) {
     body: form,
   })
   const body = await res.json().catch(() => ({}))
-  if (res.status === 409) throw new Error(body.detail ?? 'Application already submitted for this email')
+  if (res.status === 409) throw new Error(body.detail ?? 'An application for this email already exists.')
   if (res.status === 400) throw new Error(body.detail ?? 'Invalid request')
   if (!res.ok) throw new Error(body.detail ?? 'Submission failed')
   return body
+}
+
+// ---------- Admin (Founder's Portal) ----------
+/**
+ * POST /api/admin/login - Returns { token }. Use token in Authorization: Bearer <token>.
+ */
+export async function adminLoginApi(email, password) {
+  const res = await fetch(`${API_BASE}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: (email || '').trim(), password: password || '' }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (res.status === 401) throw new Error(data.detail ?? 'Invalid admin credentials')
+  if (!res.ok) throw new Error(data.detail ?? 'Login failed')
+  return data
+}
+
+/**
+ * GET /api/admin/applications - Returns { applications }. Requires admin token.
+ */
+export async function getAdminApplications(token) {
+  const res = await fetch(`${API_BASE}/api/admin/applications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (res.status === 401) throw new Error('Admin session expired')
+  if (!res.ok) throw new Error('Failed to load applications')
+  return res.json()
+}
+
+/**
+ * POST /api/admin/applications/approve - Body: { id } or { email } for legacy apps
+ */
+export async function adminApproveApplication(token, applicationIdOrEmail) {
+  const body = applicationIdOrEmail.includes('@')
+    ? { email: applicationIdOrEmail }
+    : { id: applicationIdOrEmail }
+  const res = await fetch(`${API_BASE}/api/admin/applications/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.detail ?? 'Approve failed')
+  return data
+}
+
+/**
+ * POST /api/admin/applications/reject - Body: { id } or { email } for legacy apps
+ */
+export async function adminRejectApplication(token, applicationIdOrEmail) {
+  const body = applicationIdOrEmail.includes('@')
+    ? { email: applicationIdOrEmail }
+    : { id: applicationIdOrEmail }
+  const res = await fetch(`${API_BASE}/api/admin/applications/reject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.detail ?? 'Reject failed')
+  return data
 }
 
 /**

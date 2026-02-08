@@ -90,7 +90,7 @@ export default function HomePage() {
             >
               <div className="flex items-center gap-2 text-slate-deep/70 mb-3">
                 <Search className="w-5 h-5 text-sage" />
-                <span className="text-sm font-medium">AI trip assistant</span>
+                <span className="text-sm font-medium">Your Local AI Assistant</span>
               </div>
               <ChatInterface />
             </div>

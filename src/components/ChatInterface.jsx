@@ -206,7 +206,7 @@ export default function ChatInterface() {
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-deep">KingstonAI Assistant</h3>
+            <h3 className="text-sm font-semibold text-slate-deep">AnangAI Assistant</h3>
             <p className="text-xs text-slate-deep/60">Your local travel guide</p>
           </div>
         </div>
