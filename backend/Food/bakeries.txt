@@ -16,3 +16,11 @@ Local Sourcing: Ontario produce, local bakery goods
 Veg/Vegan Options: Yes
 Green Plate Certification: null
 Notes: Kingston's most famous bakery
+
+Business Name: demobakery
+Location: 1234 bagot st.
+Hours: Mon- Fri 10am to 5pm
+Local Sourcing: yes
+Veg/Vegan Options: yes
+Green Plate Certification: null
+Notes: it's a real good bakery, make from eggs and vegan also available

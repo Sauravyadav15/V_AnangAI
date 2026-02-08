@@ -12,13 +12,28 @@ import {
   CheckCircle2,
   Store,
   Sparkles,
+  MapPin,
+  Clock,
+  Leaf,
 } from 'lucide-react'
 import { submitApplication } from '../lib/api'
 
-const BUSINESS_TYPES = ['Cafe', 'Restaurant', 'Producer', 'Market', 'Retail', 'Service', 'Other']
+// Category option: { value: file stem for backend, label: display }
+const FEATURED_CATEGORIES = [
+  { value: 'bakeries', label: 'Bakeries' },
+  { value: 'breweries_pubs', label: 'Breweries & Pubs' },
+  { value: 'cafés_coffee_shops', label: 'Cafés & Coffee Shops' },
+  { value: 'ice_cream_gelato', label: 'Ice Cream & Gelato' },
+  { value: 'restaurants', label: 'Restaurants' },
+  { value: 'shops', label: 'Shops' },
+]
+
+const GREEN_PLATE_OPTIONS = ['', 'Gold', 'Silver', 'Bronze', 'null']
 
 const inputBase =
   'w-full rounded-[var(--radius-xl)] border border-[var(--color-glass-border)] bg-white/80 px-4 py-3 text-slate-deep placeholder:text-slate-deep/50 focus:outline-none focus:ring-2 focus:ring-sage/30 focus:border-sage transition-colors'
+const selectClass =
+  `${inputBase} appearance-none cursor-pointer bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232D3748%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-11`
 
 export default function GetFeaturedPage() {
   const navigate = useNavigate()
@@ -30,13 +45,26 @@ export default function GetFeaturedPage() {
   const [form, setForm] = useState({
     name: '',
     email: '',
+    categoryFile: '',
+    // Food (restaurants, bakeries, cafes, breweries, ice_cream)
     businessName: '',
-    businessType: '',
-    businessDescription: '',
+    location: '',
+    hours: '',
+    localSourcing: '',
+    vegVegan: '',
+    greenPlateCert: '',
+    notes: '',
+    // Shops only
+    storeName: '',
+    hoursOperation: '',
+    info: '',
+    shopCategory: '',
+    // Common
     contact: '',
   })
 
   const update = (field, value) => setForm((f) => ({ ...f, [field]: value }))
+  const isShops = form.categoryFile === 'shops'
 
   const handleYes = () => setChoseYes(true)
   const handleNo = () => navigate('/licensing-info')
@@ -125,9 +153,7 @@ export default function GetFeaturedPage() {
               </h2>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <label className="block">
-                  <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
-                    <span>Name</span>
-                  </span>
+                  <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">Name</span>
                   <input
                     type="text"
                     value={form.name}
@@ -150,47 +176,182 @@ export default function GetFeaturedPage() {
                   />
                 </label>
                 <label className="block">
-                  <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
-                    <Building2 className="w-4 h-4" /> Business Name
-                  </span>
-                  <input
-                    type="text"
-                    value={form.businessName}
-                    onChange={(e) => update('businessName', e.target.value)}
-                    required
-                    className={inputBase}
-                    placeholder="e.g. Sage & Stone Café"
-                  />
-                </label>
-                <label className="block">
                   <span className="text-sm font-medium text-slate-deep mb-1 block">Category</span>
                   <select
-                    value={form.businessType}
-                    onChange={(e) => update('businessType', e.target.value)}
+                    value={form.categoryFile}
+                    onChange={(e) => update('categoryFile', e.target.value)}
                     required
-                    className={`${inputBase} appearance-none cursor-pointer bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232D3748%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-11`}
+                    className={selectClass}
                   >
                     <option value="">Select category...</option>
-                    {BUSINESS_TYPES.map((type) => (
-                      <option key={type} value={type}>{type}</option>
+                    {FEATURED_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
                     ))}
                   </select>
                 </label>
+
+                {/* Dynamic fields: Shops */}
+                {isShops && (
+                  <>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <Store className="w-4 h-4" /> Store Name
+                      </span>
+                      <input
+                        type="text"
+                        value={form.storeName}
+                        onChange={(e) => update('storeName', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. A One Clothing Store"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <MapPin className="w-4 h-4" /> Location
+                      </span>
+                      <input
+                        type="text"
+                        value={form.location}
+                        onChange={(e) => update('location', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. 358 King Street East"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <Clock className="w-4 h-4" /> Hours of Operation
+                      </span>
+                      <input
+                        type="text"
+                        value={form.hoursOperation}
+                        onChange={(e) => update('hoursOperation', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. Mon-Sat: 10:00 AM - 5:30 PM | Sun: Closed"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <FileText className="w-4 h-4" /> Info
+                      </span>
+                      <textarea
+                        value={form.info}
+                        onChange={(e) => update('info', e.target.value)}
+                        rows={3}
+                        className={`${inputBase} min-h-[80px] resize-y`}
+                        placeholder="Describe your store (e.g. Family-owned outdoor lifestyle store...)"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-deep mb-1 block">Category (store type)</span>
+                      <input
+                        type="text"
+                        value={form.shopCategory}
+                        onChange={(e) => update('shopCategory', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. Lifestyle, Women's clothing, Men's Clothing"
+                      />
+                    </label>
+                  </>
+                )}
+
+                {/* Dynamic fields: Food (restaurants, bakeries, cafes, etc.) */}
+                {!isShops && form.categoryFile && (
+                  <>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <Building2 className="w-4 h-4" /> Business Name
+                      </span>
+                      <input
+                        type="text"
+                        value={form.businessName}
+                        onChange={(e) => update('businessName', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. Miss Bao"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <MapPin className="w-4 h-4" /> Location
+                      </span>
+                      <input
+                        type="text"
+                        value={form.location}
+                        onChange={(e) => update('location', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. 294 Princess St"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <Clock className="w-4 h-4" /> Hours
+                      </span>
+                      <input
+                        type="text"
+                        value={form.hours}
+                        onChange={(e) => update('hours', e.target.value)}
+                        required
+                        className={inputBase}
+                        placeholder="e.g. Thu-Sun 5pm-10pm (Closed Mon-Wed)"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <Leaf className="w-4 h-4" /> Local Sourcing
+                      </span>
+                      <input
+                        type="text"
+                        value={form.localSourcing}
+                        onChange={(e) => update('localSourcing', e.target.value)}
+                        className={inputBase}
+                        placeholder="e.g. Yes, Ontario produce"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-deep mb-1 block">Veg/Vegan Options</span>
+                      <input
+                        type="text"
+                        value={form.vegVegan}
+                        onChange={(e) => update('vegVegan', e.target.value)}
+                        className={inputBase}
+                        placeholder="e.g. Yes, Limited"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-deep mb-1 block">Green Plate Certification</span>
+                      <select
+                        value={form.greenPlateCert}
+                        onChange={(e) => update('greenPlateCert', e.target.value)}
+                        className={selectClass}
+                      >
+                        {GREEN_PLATE_OPTIONS.map((opt) => (
+                          <option key={opt || 'none'} value={opt}>{opt || 'None'}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block">
+                      <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
+                        <FileText className="w-4 h-4" /> Notes
+                      </span>
+                      <textarea
+                        value={form.notes}
+                        onChange={(e) => update('notes', e.target.value)}
+                        rows={3}
+                        className={`${inputBase} min-h-[80px] resize-y`}
+                        placeholder="e.g. Sustainability themed Asian fusion Restaurant"
+                      />
+                    </label>
+                  </>
+                )}
+
                 <label className="block">
                   <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
-                    <FileText className="w-4 h-4" /> Description
-                  </span>
-                  <textarea
-                    value={form.businessDescription}
-                    onChange={(e) => update('businessDescription', e.target.value)}
-                    rows={4}
-                    className={`${inputBase} min-h-[100px] resize-y`}
-                    placeholder="Describe your business and what makes it unique..."
-                  />
-                </label>
-                <label className="block">
-                  <span className="flex items-center gap-2 text-sm font-medium text-slate-deep mb-1">
-                    <Phone className="w-4 h-4" /> Contact
+                    <Phone className="w-4 h-4" /> Contact number
                   </span>
                   <input
                     type="text"
@@ -210,7 +371,7 @@ export default function GetFeaturedPage() {
                     onChange={(e) => setLicenseFile(e.target.files?.[0] ?? null)}
                     className="block w-full text-sm text-slate-deep file:mr-3 file:py-2 file:px-4 file:rounded-[var(--radius-xl)] file:border-0 file:bg-sage/20 file:text-sage file:font-medium"
                   />
-                  <p className="text-xs text-slate-deep/60 mt-1">PDF or image. Optional at this stage.</p>
+                  <p className="text-xs text-slate-deep/60 mt-1">PDF or image. Upload your license or identity document.</p>
                 </label>
 
                 {submitError && (

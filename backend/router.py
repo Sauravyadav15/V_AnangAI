@@ -44,6 +44,23 @@ FOOD_KEYWORD_MAP = {
     "gelato": ["ice_cream_gelato.txt"],
     "frozen": ["ice_cream_gelato.txt"],
     "dessert": ["ice_cream_gelato.txt", "bakeries.txt"],
+    # Shops / local stores (shops.txt)
+    "shop": ["shops.txt"],
+    "shops": ["shops.txt"],
+    "store": ["shops.txt"],
+    "stores": ["shops.txt"],
+    "clothing": ["shops.txt"],
+    "clothes": ["shops.txt"],
+    "fashion": ["shops.txt"],
+    "boutique": ["shops.txt"],
+    "thrift": ["shops.txt"],
+    "footwear": ["shops.txt"],
+    "shoe": ["shops.txt"],
+    "shoes": ["shops.txt"],
+    "bridal": ["shops.txt"],
+    "gift": ["shops.txt"],
+    "consignment": ["shops.txt"],
+    "vintage": ["shops.txt"],
 }
 
 PLACE_KEYWORDS = ["place", "places", "visit", "visiting", "attraction", "attractions", "museum", "park", "tourist", "sightseeing", "landmark", "monument", "see", "sight", "explore", "exploring", "tour", "tours", "destination", "destinations", "good", "best", "recommend", "recommendation"]
@@ -238,6 +255,56 @@ def split_food_entries(content: str) -> List[str]:
     return [e.strip() for e in entries if e.strip() and not e.startswith("KINGSTON") and not e.startswith("===")]
 
 
+def split_shops_entries(content: str) -> List[str]:
+    """Split shops file content into individual entries (Store Name: or Business Name: ... separated by ---)."""
+    entries = []
+    current_entry = []
+    lines = content.split('\n')
+    for line in lines:
+        is_new_entry = line.startswith("Store Name:") or line.startswith("Business Name:")
+        if is_new_entry and current_entry:
+            entries.append('\n'.join(current_entry))
+            current_entry = [line]
+        elif line.strip() == "---" or (line.strip().startswith("END OF") and current_entry):
+            if current_entry:
+                entries.append('\n'.join(current_entry))
+            current_entry = []
+        elif not (line.strip() == "---" or line.strip().startswith("END OF")):
+            current_entry.append(line)
+    if current_entry:
+        entries.append('\n'.join(current_entry))
+    return [e.strip() for e in entries if e.strip() and not e.startswith("KINGSTON") and not e.startswith("====")]
+
+
+def parse_shop_entry(entry_text: str) -> Dict:
+    """Parse a shop/store entry (Store Name or Business Name, Location, Hours of Operation or Hours, Info or Notes, Category)."""
+    entry = {}
+    lines = entry_text.strip().split('\n')
+    for line in lines:
+        line = line.strip()
+        if not line or line == "---":
+            continue
+        if line.startswith("Store Name:"):
+            entry["name"] = line.replace("Store Name:", "").strip()
+        elif line.startswith("Business Name:"):
+            entry["name"] = line.replace("Business Name:", "").strip()
+        elif line.startswith("Location:"):
+            entry["location"] = line.replace("Location:", "").strip()
+        elif line.startswith("Location URL:"):
+            entry["url"] = line.replace("Location URL:", "").strip()
+        elif line.startswith("Hours of Operation:") or line.startswith("Hours:"):
+            entry["hours"] = (line.replace("Hours of Operation:", "").replace("Hours:", "").strip())
+        elif line.startswith("Info:") or line.startswith("Notes:"):
+            entry["notes"] = (line.replace("Info:", "").replace("Notes:", "").strip())
+        elif line.startswith("Local Sourcing:"):
+            entry["local_sourcing"] = line.replace("Local Sourcing:", "").strip()
+        elif line.startswith("Category:"):
+            entry["category"] = line.replace("Category:", "").strip()
+    if not entry.get("url") and entry.get("location") and entry.get("name"):
+        entry["url"] = generate_google_maps_url(entry["location"], entry["name"])
+    return entry
+
+
 def split_place_entries(content: str) -> List[str]:
     """Split places file content into individual entries"""
     entries = []
@@ -267,13 +334,17 @@ def load_all_data() -> Dict[str, Dict[str, List[Dict]]]:
         "events": {}
     }
     
-    # Load Food files
+    # Load Food files (and shops.txt with shop parser)
     for file_path in data_files["food"]:
         file_name = file_path.stem
         content = load_data(file_path)
         if content:
-            entries = split_food_entries(content)
-            parsed_entries = [parse_food_entry(e) for e in entries if e]
+            if file_name == "shops":
+                entries = split_shops_entries(content)
+                parsed_entries = [parse_shop_entry(e) for e in entries if e]
+            else:
+                entries = split_food_entries(content)
+                parsed_entries = [parse_food_entry(e) for e in entries if e]
             all_data["food"][file_name] = parsed_entries
             print(f"✅ Loaded {len(parsed_entries)} entries from {file_name}")
     
@@ -727,6 +798,10 @@ def format_context_for_prompt(context_dict: Dict) -> str:
                         food_parts.append(f"   Hours: {entry['hours']}")
                     if entry.get('notes'):
                         food_parts.append(f"   Notes: {entry['notes']}")
+                    if entry.get('category'):
+                        food_parts.append(f"   Category: {entry['category']}")
+                    if entry.get('local_sourcing'):
+                        food_parts.append(f"   Local Sourcing: {entry['local_sourcing']}")
                     if entry.get('veg_vegan'):
                         food_parts.append(f"   Veg/Vegan: {entry['veg_vegan']}")
                     if entry.get('certification') and entry.get('certification') != 'null':
@@ -880,9 +955,18 @@ User Question: {question}
 
 CRITICAL FORMATTING RULES - FOLLOW EXACTLY:
 
-1. Section Headers: Use **CAFÉS**, **RESTAURANTS**, **BAKERIES**, **PUBS**, **PLACES**, **EVENTS** as section headers (bold markdown)
+1. Section Headers: Use **CAFÉS**, **RESTAURANTS**, **BAKERIES**, **PUBS**, **SHOPS**, **PLACES**, **EVENTS** as section headers (bold markdown)
 
 2. Item Format - Each business/place/event name should be a BOLD HEADER (not numbered):
+   
+   For Shops (stores, clothing, boutiques, etc.): When data includes "Category:" use section **SHOPS** and format as:
+   **Store Name**
+   • Location: [address]
+   • Find Location: [URL from data - ONLY if available]
+   • Hours: [hours]
+   • Notes: [description if available]
+   • Category: [e.g. WOMEN'S CLOTHING, FOOTWEAR]
+   • Local Sourcing: [if available]
    
    For Food Places:
    **Business Name**
@@ -917,6 +1001,7 @@ CRITICAL FORMATTING RULES - FOLLOW EXACTLY:
 8. For Places, include: **Place Name**, Location, "Find Location: [URL]" if URL is available, About, Hours, Fees
 9. For Events, include: **Event Name**, Date (or Date Range), Venue, Location, and "Find Location: [URL]" if URL is available in the data
 10. For Food Places, include: **Business Name**, Location, "Find Location: [URL]" if URL is available, Hours, Notes, Veg/Vegan options, Green Plate Certification (Gold/Silver/Bronze) if available
+10a. For Shops (stores, clothing, boutiques), include: **Store Name**, Location, "Find Location: [URL]" if available, Hours, Notes, Category, Local Sourcing if available
 
 11. Order items logically (alphabetically or by relevance)
 

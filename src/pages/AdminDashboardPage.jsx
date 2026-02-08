@@ -111,6 +111,7 @@ export default function AdminDashboardPage() {
                 <tr className="border-b border-[var(--color-glass-border)]">
                   <th className="px-4 py-3 text-sm font-semibold text-slate-deep">Name</th>
                   <th className="px-4 py-3 text-sm font-semibold text-slate-deep">Email</th>
+                  <th className="px-4 py-3 text-sm font-semibold text-slate-deep">Contact</th>
                   <th className="px-4 py-3 text-sm font-semibold text-slate-deep">Business</th>
                   <th className="px-4 py-3 text-sm font-semibold text-slate-deep">Category</th>
                   <th className="px-4 py-3 text-sm font-semibold text-slate-deep">Status</th>
@@ -126,6 +127,7 @@ export default function AdminDashboardPage() {
                   >
                     <td className="px-4 py-3 text-sm text-slate-deep">{app.name || '—'}</td>
                     <td className="px-4 py-3 text-sm text-slate-deep">{app.email || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-slate-deep">{app.contact || '—'}</td>
                     <td className="px-4 py-3 text-sm text-slate-deep">{app.biz_name || '—'}</td>
                     <td className="px-4 py-3 text-sm text-slate-deep">{app.biz_cat || '—'}</td>
                     <td className="px-4 py-3">

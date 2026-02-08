@@ -67,16 +67,27 @@ export async function loginApi(email, password) {
 }
 
 /**
- * POST /api/submit-application - Get Featured: name, email, business details + optional license file.
+ * POST /api/submit-application - Get Featured: name, email, category, dynamic fields + optional license file.
  */
 export async function submitApplication(data, licenseFile = null) {
   const form = new FormData()
   form.append('name', (data.name ?? '').trim())
   form.append('email', (data.email ?? '').trim())
+  form.append('contact', (data.contact ?? '').trim())
+  form.append('category_file', (data.categoryFile ?? '').trim())
+  // Food categories
   form.append('businessName', data.businessName ?? '')
-  form.append('businessType', data.businessType ?? '')
-  form.append('businessDescription', data.businessDescription ?? '')
-  form.append('contact', data.contact ?? '')
+  form.append('location', data.location ?? '')
+  form.append('hours', data.hours ?? '')
+  form.append('localSourcing', data.localSourcing ?? '')
+  form.append('vegVegan', data.vegVegan ?? '')
+  form.append('greenPlateCert', data.greenPlateCert ?? '')
+  form.append('notes', data.notes ?? '')
+  // Shops
+  form.append('storeName', data.storeName ?? '')
+  form.append('hoursOperation', data.hoursOperation ?? '')
+  form.append('info', data.info ?? '')
+  form.append('shopCategory', data.shopCategory ?? '')
   if (licenseFile) form.append('license_file', licenseFile)
   const res = await fetch(`${API_BASE}/api/submit-application`, {
     method: 'POST',

@@ -1,56 +1,176 @@
-KINGSTON CLOTHING & FASHION DATABASE
-================================================================================
+KINGSTON LOCAL STORES DATABASE
+================================
 
-Business Name: 23&co.
-Location: 60 Brock St
-Hours: Mon-Sun: TBD - Call to confirm
-Local Sourcing: Local designers (some)
-Notes: Trendy local fashion boutique
+Store Name: A One Clothing Store
+Location: 358 King Street East
+Hours of Operation: Mon-Sat: 10:00 AM - 5:30 PM | Sun: Closed
+Info: Family-owned outdoor lifestyle store since 1938. Specializes in Blundstone footwear and Canadian-made products.
+Category: Lifestyle
+---
 
-Business Name: A One Clothing Store
-Location: 358 King St E
-Hours: Mon-Sun: TBD - Call to confirm
-Local Sourcing: Not publicly listed
-Notes: Long-standing local apparel shop
+Store Name: Agent 99
+Location: 237 Princess Street
+Hours of Operation: Mon-Wed: 11:00 AM - 6:00 PM | Thu-Fri: 10:00 AM - 7:00 PM | Sat: 10:00 AM - 6:00 PM | Sun: 11:00 AM - 5:00 PM
+Info: Women's boutique featuring trendy clothing and prom dresses. Family-owned local business.
+Category: Women's clothing
+---
 
-Business Name: Agent 99 Kingston
-Location: 237 Princess St
-Hours: Mon-Wed: 11am-6pm, Thu-Fri: 10am-7pm, Sat: 10am-6pm, Sun: 11am-5pm
-Local Sourcing: Local designers (some)
-Notes: Well-known local fashion retailer
+Store Name: Andrei Master Tailors
+Location: 170 Princess Street
+Hours of Operation: Mon-Fri: 9:00 AM - 6:00 PM | Sat: 10:00 AM - 1:00 PM | Sun: Closed
+Info: Professional tailoring and alterations with 45+ years of experience. Custom suits and formal wear.
+Category: Men's Clothing
+---
 
-Business Name: Alina Ballerina
-Location: 1187 Princess St
-Hours: Mon-Sun: TBD - Call to confirm (Dance school with retail)
-Local Sourcing: Not publicly listed
-Notes: Local dance apparel shop
+Store Name: Bridal Creations
+Location: 296 Queen Street
+Hours of Operation: By Appointment Only
+Info: Bridal boutique specializing in wedding dresses and bridal wear.
+Category: Women's Clothing
+---
 
-Business Name: Expressions Fashion Boutique
-Location: 239 Princess St
-Hours: Mon-Sat: 10am-5pm, Sun: 12pm-4pm
-Local Sourcing: Not publicly listed
-Notes: Local women's fashion retailer
 
-Business Name: Heel Boy
-Location: 212 Princess St
-Hours: Mon-Tue: 10:30am-6pm, Wed-Fri: 10:30am-6:30pm, Sat: 10:30am-5:30pm, Sun: 11:30am-5pm
-Local Sourcing: Not publicly listed
-Notes: Local shoe retailer
+Store Name: Chris James
+Location: 253 Ontario Street
+Hours of Operation: Mon-Fri: 10:00 AM - 6:00 PM | Sat: 10:00 AM - 5:00 PM | Sun: Closed
+Info: Men's fashion boutique offering high-quality clothing and lifestyle items.
+Category: Men's Clothing
+---
 
-Business Name: Hubba Hubba
-Location: 88 Princess St
-Hours: Mon-Sun: TBD - Call to confirm
-Local Sourcing: Local designers (some)
-Notes: Popular local fashion boutique
+Store Name: City + Oak
+Location: 212 Princess Street
+Hours of Operation: Mon-Wed: 10:00 AM - 5:00 PM | Thu: 10:00 AM - 8:00 PM | Fri-Sat: 10:00 AM - 5:00 PM | Sun: 11:00 AM - 4:00 PM
+Info: Women's boutique with premium brands and personal styling services. Community event host.
+Category: Men's Clothing
+---
 
-Business Name: Urban Outfitters Kingston
-Location: 207 Princess St
-Hours: Mon-Wed: 10am-8pm, Thu-Fri: 10am-9pm, Sat: 10am-8pm, Sun: 10am-6pm
-Local Sourcing: Not publicly listed
-Notes: Local clothing retailer
+Store Name: ClosettCandyy Consignment
+Location: 94 Brock Street
+Hours of Operation: Mon: Closed | Tue-Sat: 11:00 AM - 5:00 PM | Sun: 11:00 AM - 4:00 PM
+Info: Sustainable consignment fashion store offering pre-loved clothing and accessories.
+Category: Thrift store
+---
 
-Business Name: Whit Kingston
-Location: 239 Princess St
-Hours: Mon-Sun: TBD - Call to confirm
-Local Sourcing: Local designers (some)
-Notes: Local fashion boutique
+Store Name: Colourways Sneaker World
+Location: 165 Ontario Street
+Hours of Operation: Mon-Sat: 11:00 AM - 7:00 PM | Sun: 12:00 PM - 5:00 PM
+Info: Sneakers and streetwear specialty store.
+Category: Footwear
+---
+
+Store Name: Dub Finds
+Location: 222 Wellington Street
+Hours of Operation: Mon-Sat: 11:00 AM - 6:00 PM | Sun: 12:00 PM - 5:00 PM
+Info: Vintage and unique clothing finds. Local vintage shop.
+Category: Thrift Store
+---
+
+Store Name: Fancy That
+Location: 48 Princess Street
+Hours of Operation: Mon-Sat: 10:00 AM - 5:00 PM | Sun: Closed
+Info: Women's clothing and accessories boutique. Long-established business with 50+ years in Kingston.
+Category: Women's Clothing
+---
+
+Store Name: Heel Boy
+Location: 244 Princess Street
+Hours of Operation: Mon-Sat: 10:00 AM - 6:00 PM | Sun: 11:00 AM - 5:00 PM
+Info: Shoe store and repair services. Local service business.
+Category: Footwear
+---
+
+
+Store Name: Kingston Shoe Repair
+Location: 51 Montreal Street
+Hours of Operation: Mon-Fri: 9:00 AM - 5:00 PM | Sat: 9:00 AM - 3:00 PM | Sun: Closed
+Info: Professional shoe repair and maintenance services.
+Category: Footwear
+---
+
+Store Name: Lovebird Bridal Boutique
+Location: 172 Ontario Street
+Hours of Operation: By Appointment Only
+Info: Bridal boutique specializing in wedding dresses and accessories.
+Category: Women's Clothing
+---
+
+Store Name: McMahon's House of Flowers
+Location: 208 Princess Street
+Hours of Operation: Mon-Fri: 9:00 AM - 5:00 PM | Sat: 9:00 AM - 4:00 PM | Sun: Closed
+Info: Local florist providing flowers and related services.
+Category: Flower shop
+---
+
+Store Name: Montreal St. Collective
+Location: 39 Montreal Street
+Hours of Operation: Mon: Closed | Tue-Sat: 11:00 AM - 5:00 PM | Sun: 11:00 AM - 4:00 PM
+Info: Thrift, vintage, and antiques collective. Locally-owned sustainable shopping.
+Category: Thrift Shop
+---
+
+
+Store Name: Send in the Clowns
+Location: 120 Princess Street
+Hours of Operation: Mon-Sat: 10:00 AM - 5:00 PM | Sun: Closed
+Info: Gift shop featuring unique gifts, balloons, and accessories.
+Category: Gift
+---
+
+Store Name: Sepp's Skis & Snowboards
+Location: 13 Montreal Street
+Hours of Operation: Mon-Fri: 10:00 AM - 6:00 PM | Sat: 10:00 AM - 5:00 PM | Sun: Closed
+Info: Winter sports specialty shop offering ski and snowboard apparel and equipment.
+Category: Sports
+---
+
+Store Name: Smith Army Surplus
+Location: 86 Princess Street
+Hours of Operation: Mon-Fri: 9:30 AM - 6:00 PM | Sat: 10:00 AM - 6:00 PM | Sun: 11:00 AM - 5:00 PM
+Info: Military surplus and outdoor gear store. Locally owned since 1990 with 35+ years of service.
+Category: Antique Shop
+---
+
+Store Name: The Keep Refillery
+Location: 206 Princess Street
+Hours of Operation: Mon: Closed | Tue-Sat: 10:00 AM - 6:00 PM | Sun: 11:00 AM - 5:00 PM
+Info: Eco-friendly refill  store promoting sustainable living.
+Category: Sustainability Store
+---
+
+Store Name: Thrifty & Chic
+Location: 352 King Street East
+Hours of Operation: Mon: Closed | Tue-Sat: 11:00 AM - 5:00 PM | Sun: 11:00 AM - 4:00 PM
+Info: Thrift and consignment clothing store. Local sustainable shopping option.
+Category: Sustainable shop
+---
+
+Store Name: Trailhead
+Location: 262 Princess Street
+Hours of Operation: Mon-Sat: 10:00 AM - 6:00 PM | Sun: 11:00 AM - 5:00 PM
+Info: Independent outdoor retailer offering gear and clothing for outdoor enthusiasts.
+Category: Sports
+---
+
+Store Name: Tribal Voices
+Location: 117 Princess Street
+Hours of Operation: Mon-Sat: 10:00 AM - 5:00 PM | Sun: 11:00 AM - 4:00 PM
+Info: Indigenous-owned business featuring arts, crafts, and clothing celebrating Indigenous culture.
+Category: Arts
+---
+
+Store Name: Waterfront Gifts & Apparel
+Location: 248 Ontario Street
+Hours of Operation: Mon-Sat: 10:00 AM - 6:00 PM | Sun: 11:00 AM - 5:00 PM
+Info: Gift shop and Kingston-themed apparel. Tourism-focused local business.
+Category: Gift Shop
+---
+
+Store Name: YGK Thrift
+Location: 165 Princess Street
+Hours of Operation: Mon: Closed | Tue-Sat: 11:00 AM - 5:00 PM | Sun: 11:00 AM - 4:00 PM
+Info: Thrift and vintage clothing store offering affordable, sustainable fashion.
+Category: Thrift store
+---
+
+END OF DATABASE
+Total Entries: 35 Locally-Owned Kingston Stores

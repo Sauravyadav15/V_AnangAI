@@ -3,7 +3,7 @@ import { MapPin, Clock, DollarSign, Leaf, Info, ExternalLink } from 'lucide-reac
 import CertificationLeaves from './CertificationLeaves'
 
 export default function DiscoveryCard({ entry, type }) {
-  const { name, location, url, hours, fees, about, notes, local_sourcing, veg_vegan, certification, date, venue } = entry
+  const { name, location, url, hours, fees, about, notes, local_sourcing, veg_vegan, certification, date, venue, category } = entry
 
   return (
     <motion.article
@@ -33,6 +33,15 @@ export default function DiscoveryCard({ entry, type }) {
         <p className="text-slate-deep/70 text-sm mb-3 leading-relaxed">
           {about || notes}
         </p>
+      )}
+
+      {/* Shops: Category (e.g. WOMEN'S CLOTHING, FOOTWEAR) */}
+      {category && (
+        <div className="flex items-center gap-2 text-slate-deep/80 text-sm mb-2">
+          <Info className="w-4 h-4 shrink-0 text-sage" />
+          <span className="font-medium">Category:</span>
+          <span>{category}</span>
+        </div>
       )}
 
       {/* Event-specific: Date and Venue */}

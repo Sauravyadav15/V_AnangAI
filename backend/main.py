@@ -11,7 +11,7 @@ from fastapi import Body, Depends, FastAPI, File, Form, Header, HTTPException, Q
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from router import ask, discover_data_files, load_data, split_food_entries, split_place_entries, parse_food_entry, parse_place_entry, parse_event_entry
+from router import ask, discover_data_files, load_data, split_food_entries, split_place_entries, split_shops_entries, parse_food_entry, parse_place_entry, parse_shop_entry, parse_event_entry
 
 app = FastAPI(title="AnangAI Civic Portal API")
 
@@ -153,22 +153,49 @@ def ensure_user(email: str, data: dict):
     return len(users) - 1, users
 
 
+# Allowed category_file values (file stems under Food/)
+FEATURED_CATEGORY_FILES = {"bakeries", "breweries_pubs", "cafés_coffee_shops", "ice_cream_gelato", "restaurants", "shops"}
+FOOD_DIR = BASE_DIR / "Food"
+
+
 @app.post("/api/submit-application")
 async def submit_application(
     name: str = Form(""),
     email: str = Form(...),
+    contact: str = Form(""),
+    category_file: str = Form(""),
+    # Food fields
     businessName: str = Form(""),
+    location: str = Form(""),
+    hours: str = Form(""),
+    localSourcing: str = Form(""),
+    vegVegan: str = Form(""),
+    greenPlateCert: str = Form(""),
+    notes: str = Form(""),
+    # Shops fields
+    storeName: str = Form(""),
+    hoursOperation: str = Form(""),
+    info: str = Form(""),
+    shopCategory: str = Form(""),
+    # Legacy (keep for backward compat)
     businessType: str = Form(""),
     businessDescription: str = Form(""),
-    contact: str = Form(""),
     license_file: UploadFile = File(None),
 ):
     """
-    Public "Get Featured" submission. Saves to applications.txt with status pending.
+    Public "Get Featured" submission. Saves ALL form data to applications.txt with status pending.
+    applications.txt is the single source of truth for every Get Featured submission.
+    On admin approve, selective data from this record is appended to the respective Food/*.txt file
+    (e.g. shops -> shops.txt, restaurants -> restaurants.txt) using that file's required schema.
     """
     email = (email or "").strip()
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
+    cat = (category_file or "").strip()
+    if cat and cat not in FEATURED_CATEGORY_FILES:
+        raise HTTPException(status_code=400, detail="Invalid category")
+    if not cat:
+        raise HTTPException(status_code=400, detail="Category is required")
     apps_data = load_applications()
     for a in apps_data.get("applications", []):
         if (a.get("email") or "").strip().lower() == email.lower():
@@ -187,18 +214,38 @@ async def submit_application(
         except Exception as e:
             raise HTTPException(500, f"Save failed: {e}")
         license_url = dest_name
+    # Display name: store name or business name
+    biz_name = (storeName or businessName or "").strip() or (businessType or "").strip()
     app_id = str(uuid.uuid4())
     apps = apps_data.get("applications", [])
+    # Store ALL data from Get Featured form so admin can review and we can append to Food/*.txt on approve
     apps.append({
         "id": app_id,
         "name": (name or "").strip(),
         "email": email,
-        "biz_name": (businessName or "").strip(),
-        "biz_cat": (businessType or "").strip(),
-        "biz_desc": (businessDescription or "").strip(),
         "contact": (contact or "").strip(),
+        "category_file": cat,
+        "biz_name": biz_name,
+        "biz_cat": cat.replace("_", " ").title(),
+        "biz_desc": (businessDescription or notes or info or "").strip(),
         "license_url": license_url,
         "status": "pending",
+        # Food categories (restaurants, bakeries, cafes, breweries_pubs, ice_cream_gelato)
+        "businessName": (businessName or "").strip(),
+        "location": (location or "").strip(),
+        "hours": (hours or "").strip(),
+        "local_sourcing": (localSourcing or "").strip(),
+        "veg_vegan": (vegVegan or "").strip(),
+        "green_plate_cert": (greenPlateCert or "").strip() or "null",
+        "notes": (notes or "").strip(),
+        # Shops only
+        "store_name": (storeName or "").strip(),
+        "hours_operation": (hoursOperation or "").strip(),
+        "info": (info or "").strip(),
+        "shop_category": (shopCategory or "").strip(),
+        # Legacy form fields (keep so we store everything from the page)
+        "businessType": (businessType or "").strip(),
+        "businessDescription": (businessDescription or "").strip(),
     })
     apps_data["applications"] = apps
     save_applications(apps_data)
@@ -235,9 +282,58 @@ def _find_application(data, app_id: str | None, email: str | None):
     return None, None
 
 
+def _append_application_to_food_file(app: dict) -> None:
+    """
+    On approve: read selective data from the application (saved in applications.txt)
+    and append one entry to the correct Food/*.txt file using that file's exact schema.
+    - shops -> shops.txt: Store Name, Location, Hours of Operation, Info, Category, ---
+    - restaurants/bakeries/cafes/etc. -> Business Name, Location, Hours, Local Sourcing,
+      Veg/Vegan Options, Green Plate Certification, Notes
+    """
+    cat_file = (app.get("category_file") or "").strip()
+    if not cat_file or cat_file not in FEATURED_CATEGORY_FILES:
+        return
+    path = FOOD_DIR / f"{cat_file}.txt"
+    if not path.exists():
+        return
+    # Require at least a name so we don't append empty entries (e.g. old applications)
+    entry_name = (app.get("store_name") or app.get("biz_name") or app.get("businessName") or "").strip()
+    if not entry_name:
+        return
+    if cat_file == "shops":
+        # Exact schema required by shops.txt
+        lines = [
+            "",
+            "Store Name: " + entry_name,
+            "Location: " + (app.get("location") or ""),
+            "Hours of Operation: " + (app.get("hours_operation") or app.get("hours") or ""),
+            "Info: " + (app.get("info") or ""),
+            "Category: " + (app.get("shop_category") or ""),
+            "---",
+        ]
+    else:
+        # Exact schema required by restaurants.txt, bakeries.txt, etc.
+        lines = [
+            "",
+            "Business Name: " + entry_name,
+            "Location: " + (app.get("location") or ""),
+            "Hours: " + (app.get("hours") or app.get("hours_operation") or ""),
+            "Local Sourcing: " + (app.get("local_sourcing") or ""),
+            "Veg/Vegan Options: " + (app.get("veg_vegan") or ""),
+            "Green Plate Certification: " + (app.get("green_plate_cert") or "null"),
+            "Notes: " + (app.get("notes") or app.get("info") or ""),
+        ]
+    block = "\n".join(lines)
+    try:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(block)
+    except Exception:
+        pass
+
+
 @app.post("/api/admin/applications/approve")
 def admin_approve_application(body: ApplicationIdBody, _: bool = Depends(require_admin)):
-    """Set application status to approved (admin only). Body: { "id": "..." } or { "email": "..." }."""
+    """Set application status to approved (admin only). Appends entry to the category Food/*.txt file."""
     app_id = (body.id or "").strip() or None
     email = (body.email or "").strip() or None
     if not app_id and not email:
@@ -247,6 +343,7 @@ def admin_approve_application(body: ApplicationIdBody, _: bool = Depends(require
     if i is None:
         raise HTTPException(status_code=404, detail="Application not found")
     a["status"] = "approved"
+    _append_application_to_food_file(a)
     save_applications(data)
     return {"id": a.get("id"), "status": "approved"}
 
@@ -771,11 +868,18 @@ def get_discovery_data(category_id: str = Query(..., description="Category ID (f
         entries = []
         
         if file_type == "food":
-            entry_texts = split_food_entries(content)
-            for entry_text in entry_texts:
-                entry = parse_food_entry(entry_text)
-                if entry.get("name"):
-                    entries.append(entry)
+            if category_id == "shops":
+                entry_texts = split_shops_entries(content)
+                for entry_text in entry_texts:
+                    entry = parse_shop_entry(entry_text)
+                    if entry.get("name"):
+                        entries.append(entry)
+            else:
+                entry_texts = split_food_entries(content)
+                for entry_text in entry_texts:
+                    entry = parse_food_entry(entry_text)
+                    if entry.get("name"):
+                        entries.append(entry)
         elif file_type == "places":
             entry_texts = split_place_entries(content)
             for entry_text in entry_texts:
