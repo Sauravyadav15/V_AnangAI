@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLanguage } from '../context/LanguageContext'
 import CertificationLeaves from './CertificationLeaves'
+import AccessibilityIcon from './AccessibilityIcon'
+import WashroomIcon from './WashroomIcon'
 
 export default function ChatInterface() {
   const [input, setInput] = useState('')
@@ -127,16 +129,10 @@ export default function ChatInterface() {
           )
         
         case 'bullet':
-          // Check if value is a URL
+          // Check if value is a URL (must be checked FIRST)
           const isUrl = el.value && (el.value.startsWith('http://') || el.value.startsWith('https://'))
           // Check for location-related labels in both English and French
           const labelLower = el.label.toLowerCase()
-          const isLocationLink = (
-            labelLower.includes('location') || 
-            labelLower.includes('emplacement') ||
-            labelLower.includes('find location') ||
-            labelLower.includes("trouver l'emplacement")
-          ) && isUrl
           
           // Check if this is a Green Plate Certification line (English or French)
           const isCertification = (
@@ -145,21 +141,28 @@ export default function ChatInterface() {
           )
           const certValue = isCertification ? el.value : null
           
+          // Check if this is an Accessibility line (English or French)
+          const isAccessibility = (
+            labelLower.includes('accessibility') ||
+            labelLower.includes('accessibilité')
+          )
+          const accessibilityValue = isAccessibility ? el.value : null
+          
+          // Check if this is a Washrooms line (English or French)
+          const isWashrooms = (
+            labelLower.includes('washrooms') ||
+            labelLower.includes('toilettes')
+          )
+          const washroomsValue = isWashrooms ? el.value : null
+          
           return (
             <div key={el.key} className="ml-4 mb-1.5 flex items-start gap-2">
               <span className="text-sage mt-0.5">•</span>
               <div className="flex-1">
                 <span className="font-medium text-slate-deep/90">{el.label}:</span>
                 {el.value && (
-                  isCertification ? (
-                    <span className="ml-1 inline-flex items-center gap-1">
-                      <CertificationLeaves certification={certValue} size="w-3.5 h-3.5" />
-                      {certValue && certValue.toLowerCase() !== 'null' && (
-                        <span className="text-slate-deep/70 text-xs">({certValue})</span>
-                      )}
-                    </span>
-                  ) : isUrl ? (
-                    // Always hide URLs behind "Find Location" text (translated)
+                  // Check URL FIRST - always hide URLs behind "Find Location" text
+                  isUrl ? (
                     <a
                       href={el.value}
                       target="_blank"
@@ -168,6 +171,27 @@ export default function ChatInterface() {
                     >
                       {t('chat.findLocation')}
                     </a>
+                  ) : isCertification ? (
+                    <span className="ml-1 inline-flex items-center gap-1">
+                      <CertificationLeaves certification={certValue} size="w-3.5 h-3.5" />
+                      {certValue && certValue.toLowerCase() !== 'null' && (
+                        <span className="text-slate-deep/70 text-xs">({certValue})</span>
+                      )}
+                    </span>
+                  ) : isAccessibility ? (
+                    <span className="ml-1 inline-flex items-center gap-1.5">
+                      <AccessibilityIcon accessibility={accessibilityValue} size="w-3.5 h-3.5" />
+                      {accessibilityValue && accessibilityValue.toLowerCase() !== 'null' && (
+                        <span className="text-slate-deep/70 text-xs">({accessibilityValue})</span>
+                      )}
+                    </span>
+                  ) : isWashrooms ? (
+                    <span className="ml-1 inline-flex items-center gap-1.5">
+                      <WashroomIcon washrooms={washroomsValue} size="w-3.5 h-3.5" />
+                      {washroomsValue && washroomsValue.toLowerCase() !== 'null' && (
+                        <span className="text-slate-deep/70 text-xs">({washroomsValue})</span>
+                      )}
+                    </span>
                   ) : (
                     <span className="text-slate-deep/70 ml-1">{el.value}</span>
                   )
@@ -180,6 +204,55 @@ export default function ChatInterface() {
           return <div key={el.key} className="h-2" />
         
         case 'text':
+          // Check if text contains URLs and hide them
+          const textContent = Array.isArray(el.content) 
+            ? el.content.map(c => typeof c === 'string' ? c : String(c)).join('')
+            : (typeof el.content === 'string' ? el.content : String(el.content))
+          
+          const urlRegex = /(https?:\/\/[^\s\)]+)/g
+          const hasUrl = urlRegex.test(textContent)
+          
+          if (hasUrl) {
+            // Split text by URLs and replace URLs with "Find Location" links
+            const parts = []
+            let lastIndex = 0
+            let match
+            
+            urlRegex.lastIndex = 0 // Reset regex
+            while ((match = urlRegex.exec(textContent)) !== null) {
+              // Add text before URL
+              if (match.index > lastIndex) {
+                const beforeText = textContent.substring(lastIndex, match.index)
+                if (beforeText) {
+                  parts.push(beforeText)
+                }
+              }
+              // Add "Find Location" link
+              parts.push(
+                <a
+                  key={`url-${match.index}`}
+                  href={match[0]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sage hover:text-sage-light underline font-medium transition-colors"
+                >
+                  {t('chat.findLocation')}
+                </a>
+              )
+              lastIndex = match.index + match[0].length
+            }
+            // Add remaining text
+            if (lastIndex < textContent.length) {
+              parts.push(textContent.substring(lastIndex))
+            }
+            
+            return (
+              <p key={el.key} className="text-sm text-slate-deep/80 leading-relaxed mb-1">
+                {parts.length > 0 ? parts : el.content}
+              </p>
+            )
+          }
+          
           return (
             <p key={el.key} className="text-sm text-slate-deep/80 leading-relaxed mb-1">
               {el.content}
@@ -193,29 +266,126 @@ export default function ChatInterface() {
   }
   
   const processInlineMarkdown = (text) => {
-    // Process bold markdown (**text**)
+    // Process URLs first - replace them with "Find Location" links
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g
     const parts = []
     let lastIndex = 0
-    const boldRegex = /\*\*([^*]+)\*\*/g
-    let match
+    let urlMatch
     
-    while ((match = boldRegex.exec(text)) !== null) {
-      // Add text before bold
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index))
-      }
-      // Add bold text
-      parts.push(
-        <strong key={match.index} className="font-semibold text-slate-deep">
-          {match[1]}
-        </strong>
-      )
-      lastIndex = match.index + match[0].length
+    // Find all URLs and their positions
+    const urlMatches = []
+    urlRegex.lastIndex = 0
+    while ((urlMatch = urlRegex.exec(text)) !== null) {
+      urlMatches.push({
+        index: urlMatch.index,
+        url: urlMatch[0],
+        length: urlMatch[0].length
+      })
     }
     
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex))
+    // If no URLs, just process bold markdown
+    if (urlMatches.length === 0) {
+      const boldParts = []
+      let lastBoldIndex = 0
+      const boldRegex = /\*\*([^*]+)\*\*/g
+      let boldMatch
+      
+      while ((boldMatch = boldRegex.exec(text)) !== null) {
+        if (boldMatch.index > lastBoldIndex) {
+          boldParts.push(text.substring(lastBoldIndex, boldMatch.index))
+        }
+        boldParts.push(
+          <strong key={boldMatch.index} className="font-semibold text-slate-deep">
+            {boldMatch[1]}
+          </strong>
+        )
+        lastBoldIndex = boldMatch.index + boldMatch[0].length
+      }
+      if (lastBoldIndex < text.length) {
+        boldParts.push(text.substring(lastBoldIndex))
+      }
+      return boldParts.length > 0 ? boldParts : text
+    }
+    
+    // Process text with URLs - split by URLs and replace them
+    let currentIndex = 0
+    urlMatches.forEach((urlMatch, idx) => {
+      // Add text before URL
+      if (urlMatch.index > currentIndex) {
+        const beforeText = text.substring(currentIndex, urlMatch.index)
+        // Process bold markdown in before text
+        const boldParts = []
+        let lastBoldIndex = 0
+        const boldRegex = /\*\*([^*]+)\*\*/g
+        let boldMatch
+        boldRegex.lastIndex = 0
+        
+        while ((boldMatch = boldRegex.exec(beforeText)) !== null) {
+          if (boldMatch.index > lastBoldIndex) {
+            boldParts.push(beforeText.substring(lastBoldIndex, boldMatch.index))
+          }
+          boldParts.push(
+            <strong key={`bold-${idx}-${boldMatch.index}`} className="font-semibold text-slate-deep">
+              {boldMatch[1]}
+            </strong>
+          )
+          lastBoldIndex = boldMatch.index + boldMatch[0].length
+        }
+        if (lastBoldIndex < beforeText.length) {
+          boldParts.push(beforeText.substring(lastBoldIndex))
+        }
+        if (boldParts.length > 0) {
+          parts.push(...boldParts)
+        } else if (beforeText) {
+          parts.push(beforeText)
+        }
+      }
+      
+      // Add "Find Location" link for URL
+      parts.push(
+        <a
+          key={`url-${idx}`}
+          href={urlMatch.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sage hover:text-sage-light underline font-medium transition-colors"
+        >
+          {t('chat.findLocation')}
+        </a>
+      )
+      
+      currentIndex = urlMatch.index + urlMatch.length
+    })
+    
+    // Add remaining text after last URL
+    if (currentIndex < text.length) {
+      const remainingText = text.substring(currentIndex)
+      // Process bold markdown in remaining text
+      const boldParts = []
+      let lastBoldIndex = 0
+      const boldRegex = /\*\*([^*]+)\*\*/g
+      let boldMatch
+      boldRegex.lastIndex = 0
+      
+      while ((boldMatch = boldRegex.exec(remainingText)) !== null) {
+        if (boldMatch.index > lastBoldIndex) {
+          boldParts.push(remainingText.substring(lastBoldIndex, boldMatch.index))
+        }
+        boldParts.push(
+          <strong key={`bold-remaining-${boldMatch.index}`} className="font-semibold text-slate-deep">
+            {boldMatch[1]}
+          </strong>
+        )
+        lastBoldIndex = boldMatch.index + boldMatch[0].length
+      }
+      if (lastBoldIndex < remainingText.length) {
+        boldParts.push(remainingText.substring(lastBoldIndex))
+      }
+      if (boldParts.length > 0) {
+        parts.push(...boldParts)
+      } else if (remainingText) {
+        parts.push(remainingText)
+      }
     }
     
     return parts.length > 0 ? parts : text

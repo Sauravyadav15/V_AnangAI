@@ -273,7 +273,7 @@ def parse_food_entry(entry_text: str) -> Dict:
 
 
 def parse_place_entry(entry_text: str) -> Dict:
-    """Parse a place entry"""
+    """Parse a place entry, including Accessibility and Washrooms."""
     entry = {}
     lines = entry_text.strip().split('\n')
     
@@ -294,6 +294,32 @@ def parse_place_entry(entry_text: str) -> Dict:
             entry["hours"] = line.replace("Hours:", "").strip()
         elif line.startswith("Fees:"):
             entry["fees"] = line.replace("Fees:", "").strip()
+        elif line.startswith("Accessibility:"):
+            accessibility = line.replace("Accessibility:", "").strip()
+            # Normalize accessibility values
+            accessibility_lower = accessibility.lower()
+            if "full access" in accessibility_lower or accessibility_lower == "yes":
+                entry["accessibility"] = "Full Access"
+            elif "partial access" in accessibility_lower or "partial" in accessibility_lower:
+                entry["accessibility"] = "Partial Access"
+            elif "limited" in accessibility_lower:
+                entry["accessibility"] = "Limited"
+            elif accessibility_lower in ["null", "none", ""]:
+                entry["accessibility"] = "null"  # Keep as string for consistency
+            else:
+                entry["accessibility"] = accessibility  # Keep original if not recognized
+        elif line.startswith("Washrooms:"):
+            washrooms = line.replace("Washrooms:", "").strip()
+            # Normalize washroom values
+            washrooms_lower = washrooms.lower()
+            if washrooms_lower in ["available", "yes", "accessible washrooms available"]:
+                entry["washrooms"] = "Available"
+            elif "partial" in washrooms_lower:
+                entry["washrooms"] = "Partial Available"
+            elif washrooms_lower in ["not available", "not accessible", "no", "null", "none", ""]:
+                entry["washrooms"] = "Not Available"
+            else:
+                entry["washrooms"] = washrooms  # Keep original if not recognized
     
     # If no URL found but location exists, generate Google Maps URL
     if not entry.get("url") and entry.get("location") and entry.get("name"):
@@ -937,6 +963,10 @@ def format_context_for_prompt(context_dict: Dict) -> str:
                         place_parts.append(f"   Hours: {entry['hours']}")
                     if entry.get('fees'):
                         place_parts.append(f"   Fees: {entry['fees']}")
+                    if entry.get('accessibility') and entry.get('accessibility') != 'null':
+                        place_parts.append(f"   Accessibility: {entry['accessibility']}")
+                    if entry.get('washrooms') and entry.get('washrooms') != 'null':
+                        place_parts.append(f"   Washrooms: {entry['washrooms']}")
         if place_parts:
             parts.append('\n'.join(place_parts))
     
@@ -1132,6 +1162,8 @@ CRITICAL FORMATTING RULES - FOLLOW EXACTLY:
    • About: [description]
    • Hours: [hours]
    • Fees: [price]
+   • Accessibility: [Full Access / Partial Access / Limited / null - ONLY include if available in data]
+   • Washrooms: [Available / Partial Available / Not Available / null - ONLY include if available in data]
    
    For Events:
    **Event Name**
@@ -1146,7 +1178,7 @@ CRITICAL FORMATTING RULES - FOLLOW EXACTLY:
 6. Put exactly ONE blank line after section headers
 7. If information is missing, skip that line entirely (don't write "N/A", "TBD", or empty fields)
 
-8. For Places, include: **Place Name**, Location, "Find Location: [URL]" if URL is available, About, Hours, Fees
+8. For Places, include: **Place Name**, Location, "Find Location: [URL]" if URL is available, About, Hours, Fees, Accessibility (if available), Washrooms (if available)
 9. For Events, include: **Event Name**, Date (or Date Range), Venue, Location, and "Find Location: [URL]" if URL is available in the data
 10. For Food Places, include: **Business Name**, Location, "Find Location: [URL]" if URL is available, Hours, Notes, Veg/Vegan options, Green Plate Certification (Gold/Silver/Bronze) if available
 10a. For Shops (stores, clothing, boutiques), include: **Store Name**, Location, "Find Location: [URL]" if available, Hours, Notes, Category, Local Sourcing if available
