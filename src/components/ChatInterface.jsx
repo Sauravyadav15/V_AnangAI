@@ -3,12 +3,16 @@ import { Send, Bot, User, Sparkles } from 'lucide-react'
 import { useGemini } from '../hooks/useGemini'
 import { useApp } from '../context/AppContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from '../hooks/useTranslation'
+import { useLanguage } from '../context/LanguageContext'
 import CertificationLeaves from './CertificationLeaves'
 
 export default function ChatInterface() {
   const [input, setInput] = useState('')
   const { ask, isThinking } = useGemini()
   const { chatHistory, addChatMessage, clearChatHistory } = useApp()
+  const { language } = useLanguage()
+  const t = useTranslation()
   const bottomRef = useRef(null)
   const messagesEndRef = useRef(null)
 
@@ -22,7 +26,7 @@ export default function ChatInterface() {
     if (!trimmed || isThinking) return
     setInput('')
     addChatMessage('user', trimmed)
-    const reply = await ask(trimmed)
+    const reply = await ask(trimmed, language)
     addChatMessage('assistant', reply)
   }
 
@@ -93,13 +97,22 @@ export default function ChatInterface() {
       })
     })
     
+    // Function to translate section headers
+    const translateSectionHeader = (header) => {
+      const headerUpper = header.toUpperCase().trim()
+      // Try to get translation, fallback to original if not found
+      const translated = t(`chat.sections.${headerUpper}`, header)
+      return translated
+    }
+    
     return elements.map((el) => {
       switch (el.type) {
         case 'section-header':
+          const translatedHeader = translateSectionHeader(el.content)
           return (
             <div key={el.key} className="mt-4 mb-3 first:mt-0">
               <h3 className="text-base font-bold text-sage uppercase tracking-wide">
-                {el.content}
+                {translatedHeader}
               </h3>
             </div>
           )
@@ -116,10 +129,20 @@ export default function ChatInterface() {
         case 'bullet':
           // Check if value is a URL
           const isUrl = el.value && (el.value.startsWith('http://') || el.value.startsWith('https://'))
-          const isLocationLink = el.label.toLowerCase().includes('location') && isUrl
+          // Check for location-related labels in both English and French
+          const labelLower = el.label.toLowerCase()
+          const isLocationLink = (
+            labelLower.includes('location') || 
+            labelLower.includes('emplacement') ||
+            labelLower.includes('find location') ||
+            labelLower.includes("trouver l'emplacement")
+          ) && isUrl
           
-          // Check if this is a Green Plate Certification line
-          const isCertification = el.label.toLowerCase().includes('green plate certification')
+          // Check if this is a Green Plate Certification line (English or French)
+          const isCertification = (
+            labelLower.includes('green plate certification') ||
+            labelLower.includes('certification green plate')
+          )
           const certValue = isCertification ? el.value : null
           
           return (
@@ -136,13 +159,14 @@ export default function ChatInterface() {
                       )}
                     </span>
                   ) : isUrl ? (
+                    // Always hide URLs behind "Find Location" text (translated)
                     <a
                       href={el.value}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sage hover:text-sage-light ml-1 underline font-medium transition-colors inline-flex items-center gap-1"
                     >
-                      {isLocationLink ? 'Find Location' : el.value}
+                      {t('chat.findLocation')}
                     </a>
                   ) : (
                     <span className="text-slate-deep/70 ml-1">{el.value}</span>
@@ -206,8 +230,8 @@ export default function ChatInterface() {
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-deep">AnangAI Assistant</h3>
-            <p className="text-xs text-slate-deep/60">Your local travel guide</p>
+            <h3 className="text-sm font-semibold text-slate-deep">{t('home.assistant.title')}</h3>
+            <p className="text-xs text-slate-deep/60">{t('home.assistant.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -225,10 +249,14 @@ export default function ChatInterface() {
                 <Bot className="w-8 h-8 text-sage" />
               </div>
               <p className="text-slate-deep/70 text-sm max-w-xs">
-                Ask me about restaurants, places to visit, events, or plan your trip. I'll help you discover Kingston!
+                {t('home.emptyState.title')}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                {['Best restaurants?', 'Places near water?', 'Upcoming events?'].map((suggestion) => (
+                {[
+                  t('home.suggestions.bestRestaurants'),
+                  t('home.suggestions.placesNearWater'),
+                  t('home.suggestions.upcomingEvents')
+                ].map((suggestion) => (
                   <button
                     key={suggestion}
                     onClick={() => setInput(suggestion)}
@@ -312,7 +340,7 @@ export default function ChatInterface() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about restaurants, places, events..."
+            placeholder={t('home.placeholder')}
             className="flex-1 rounded-xl border border-white/40 bg-white/80 px-4 py-3 text-sm text-slate-deep placeholder:text-slate-deep/50 focus:outline-none focus:ring-2 focus:ring-sage/50 focus:border-sage transition-all shadow-sm"
             disabled={isThinking}
             autoFocus
@@ -332,7 +360,7 @@ export default function ChatInterface() {
             onClick={clearChatHistory}
             className="mt-2 text-xs text-slate-deep/50 hover:text-slate-deep transition-colors"
           >
-            Clear conversation
+            {t('home.emptyState.clearConversation')}
           </button>
         )}
       </div>

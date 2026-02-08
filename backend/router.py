@@ -9,7 +9,8 @@ from datetime import datetime
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
-OPENROUTER_API_KEY = "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"
+# Get API key from environment variable, fallback to hardcoded (for development only)
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or "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"
 
 # Define folder paths
 FOOD_DIR = BASE_DIR / "Food"
@@ -852,10 +853,16 @@ def format_context_for_prompt(context_dict: Dict) -> str:
     return '\n\n'.join(parts) if parts else "No relevant data found."
 
 
-def ask(question: str):
-    """Ask a question using RAG with OpenRouter across multiple data types"""
-    if not OPENROUTER_API_KEY:
-        return "❌ Error: OPENROUTER_API_KEY is not set. Please configure it in your .env file."
+def ask(question: str, language: str = "en"):
+    """
+    Ask a question using RAG with OpenRouter across multiple data types.
+    
+    Args:
+        question: The user's question
+        language: Language code ("en" for English, "fr" for French)
+    """
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_api_key_here":
+        return "❌ Error: OPENROUTER_API_KEY is not set. Please configure it in your .env file or update router.py. Get your key from https://openrouter.ai/keys"
     
     # Load all data
     print("Loading data from all files...")
@@ -945,8 +952,34 @@ def ask(question: str):
         else:
             return "I found some information, but it might not match your exact query. Try asking more specifically, for example: 'show me places to visit', 'what restaurants are there?', or 'events in February'."
     
+    # Determine response language and create language-specific instructions
+    if language == "fr":
+        language_instruction = "\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST respond entirely in French. All text, including section headers, labels, and descriptions, must be in French. Use French translations: 'Location' → 'Emplacement', 'Hours' → 'Heures', 'Find Location' → 'Trouver l'emplacement', 'About' → 'À propos', 'Fees' → 'Frais', 'Date' → 'Date', 'Venue' → 'Lieu', 'Notes' → 'Notes', 'Veg/Vegan' → 'Végétarien/Végan', 'Green Plate Certification' → 'Certification Green Plate'."
+        section_headers = "**CAFÉS**, **RESTAURANTS**, **BOULANGERIES**, **PUBS**, **MAGASINS**, **LIEUX**, **ÉVÉNEMENTS**"
+        example_format = """
+**CAFÉS**
+
+**Kingston Coffee House**
+• Emplacement: 1046 Princess St
+• Heures: Lun-Dim: 7h00 - 18h00
+• Notes: Un café local connu pour son atmosphère chaleureuse
+• Végétarien/Végan: Oui
+"""
+    else:
+        language_instruction = "\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST respond entirely in English. All text, including section headers, labels, and descriptions, must be in English."
+        section_headers = "**CAFÉS**, **RESTAURANTS**, **BAKERIES**, **PUBS**, **SHOPS**, **PLACES**, **EVENTS**"
+        example_format = """
+**CAFÉS**
+
+**Kingston Coffee House**
+• Location: 1046 Princess St
+• Hours: Mon-Sun: 7:00am - 6:00pm
+• Notes: A local coffee shop known for its cozy atmosphere
+• Veg/Vegan: Yes
+"""
+    
     # Create intelligent prompt
-    prompt = f"""You are a helpful city guide assistant for Kingston, Ontario. Use the following data to answer the user's question accurately and helpfully.
+    prompt = f"""You are a helpful city guide assistant for Kingston, Ontario. Use the following data to answer the user's question accurately and helpfully.{language_instruction}
 
 Available Data:
 {combined_context}
@@ -955,7 +988,7 @@ User Question: {question}
 
 CRITICAL FORMATTING RULES - FOLLOW EXACTLY:
 
-1. Section Headers: Use **CAFÉS**, **RESTAURANTS**, **BAKERIES**, **PUBS**, **SHOPS**, **PLACES**, **EVENTS** as section headers (bold markdown)
+1. Section Headers: Use {section_headers} as section headers (bold markdown)
 
 2. Item Format - Each business/place/event name should be a BOLD HEADER (not numbered):
    
@@ -1013,34 +1046,7 @@ CRITICAL FORMATTING RULES - FOLLOW EXACTLY:
     - Apply similar logic for food and places: "all restaurants" = full list, vague query = sample
 
 EXAMPLE FORMAT:
-
-**CAFÉS**
-
-**Kingston Coffee House**
-• Location: 1046 Princess St
-• Hours: Mon-Sun: 7:00am - 6:00pm
-• Notes: A local coffee shop known for its cozy atmosphere
-• Veg/Vegan: Yes
-
-**Sipps Coffee & Dessert Bar**
-• Location: 33 Brock St
-• Hours: Mon-Thu: 7:00am - 10:00pm, Fri-Sat: 7:00am - 11:00pm, Sun: 8:00am - 10:00pm
-• Notes: A popular downtown café, perfect for coffee and desserts
-• Veg/Vegan: Yes
-
-**EVENTS**
-
-**ReelOut Queer Film Fest 2026**
-• Date: January 29, 2026 - February 7, 2026
-• Venue: The Screening Room
-• Location: 120 Princess Street
-• Find Location: https://www.visitkingston.ca/events/reelout-queer-film-fest-2026/
-
-**Carr Harris Cup**
-• Date: February 7, 2026
-• Venue: Slush Puppie Place
-• Location: 1 The Tragically Hip Way, Kingston, ON
-• Find Location: https://www.visitkingston.ca/events/carr-harris-cup-2/
+{example_format}
 
 CRITICAL: Follow this format exactly. No numbering, no extra blank lines, clean and consistent.
 
@@ -1076,7 +1082,22 @@ Answer:"""
             if response.status_code != 200:
                 print(f"❌ Error: {response.status_code}")
                 print(f"Response: {response.text}")
-                return None
+                
+                # Provide helpful error messages
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get("error", {}).get("message", "Unknown error")
+                except:
+                    error_msg = response.text[:200] if response.text else "Unknown error"
+                
+                if response.status_code == 401:
+                    return f"❌ API Authentication Error: {error_msg}. The OpenRouter API key is invalid or expired. Please:\n1. Get a new API key from https://openrouter.ai/keys\n2. Create a .env file in the backend folder with: OPENROUTER_API_KEY=your_key_here\n3. Or update the OPENROUTER_API_KEY in router.py"
+                elif response.status_code == 429:
+                    return "❌ Rate limit exceeded. Please try again in a moment."
+                elif response.status_code >= 500:
+                    return "❌ OpenRouter API is temporarily unavailable. Please try again later."
+                else:
+                    return f"❌ API Error ({response.status_code}): {error_msg}"
             
             result = response.json()
             print(f"✅ API Response received")

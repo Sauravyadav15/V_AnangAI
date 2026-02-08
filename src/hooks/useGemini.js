@@ -5,13 +5,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 /**
  * Hook for connecting to backend chat API.
  * Handles trip queries using RAG with restaurants, places, and events data.
- * @returns {{ ask: (prompt: string) => Promise<string>, isThinking: boolean, error: string | null }}
+ * @returns {{ ask: (prompt: string, language?: string) => Promise<string>, isThinking: boolean, error: string | null }}
  */
 export function useGemini() {
   const [isThinking, setIsThinking] = useState(false)
   const [error, setError] = useState(null)
 
-  const ask = useCallback(async (userPrompt) => {
+  const ask = useCallback(async (userPrompt, language = 'en') => {
     setIsThinking(true)
     setError(null)
     try {
@@ -20,7 +20,7 @@ export function useGemini() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: userPrompt }),
+        body: JSON.stringify({ question: userPrompt, language: language }),
       })
 
       if (!response.ok) {

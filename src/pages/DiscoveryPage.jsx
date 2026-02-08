@@ -4,8 +4,10 @@ import Layout, { pageVariants, pageTransition } from '../components/Layout'
 import TabNavigation from '../components/TabNavigation'
 import DiscoveryCard from '../components/DiscoveryCard'
 import { getDiscoveryCategories, getDiscoveryData } from '../lib/api'
+import { useTranslation } from '../hooks/useTranslation'
 
 export default function DiscoveryPage() {
+  const t = useTranslation()
   const [activeTab, setActiveTab] = useState(null)
   const [categories, setCategories] = useState([])
   const [entries, setEntries] = useState([])
@@ -73,18 +75,18 @@ export default function DiscoveryPage() {
         transition={pageTransition}
       >
         <h1 className="font-[var(--font-serif)] text-3xl md:text-4xl font-bold text-slate-deep mb-2">
-          Explore
+          {t('discovery.title')}
         </h1>
         <p className="text-slate-deep/70 mb-8">
-          Explore local restaurants, places to visit, and events in Kingston.
+          {t('discovery.subtitle')}
         </p>
 
         {loading && (
-          <p className="text-slate-deep/60 text-center py-12">Loading categories…</p>
+          <p className="text-slate-deep/60 text-center py-12">{t('discovery.loadingCategories')}</p>
         )}
         {error && !loading && (
           <p className="text-red-600 text-center py-4">
-            Could not load data. Make sure the API is running on http://localhost:8000
+            {t('discovery.error')}
           </p>
         )}
 
@@ -92,15 +94,15 @@ export default function DiscoveryPage() {
           <>
             <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
 
-            {loadingData && (
-              <p className="text-slate-deep/60 text-center py-12">Loading data…</p>
-            )}
+                  {loadingData && (
+                    <p className="text-slate-deep/60 text-center py-12">{t('discovery.loadingData')}</p>
+                  )}
 
-            {!loadingData && error && (
-              <p className="text-red-600 text-center py-4">Could not load data for this category.</p>
-            )}
+                  {!loadingData && error && (
+                    <p className="text-red-600 text-center py-4">{t('discovery.errorCategory')}</p>
+                  )}
 
-            {!loadingData && !error && entries.length > 0 && (
+                  {!loadingData && !error && entries.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {entries.map((entry, index) => (
                   <DiscoveryCard
@@ -112,19 +114,19 @@ export default function DiscoveryPage() {
               </div>
             )}
 
-            {!loadingData && !error && entries.length === 0 && (
-              <p className="text-slate-deep/60 text-center py-12">
-                No entries found in this category.
-              </p>
-            )}
+                  {!loadingData && !error && entries.length === 0 && (
+                    <p className="text-slate-deep/60 text-center py-12">
+                      {t('discovery.noEntries')}
+                    </p>
+                  )}
           </>
         )}
 
-        {!loading && categories.length === 0 && !error && (
-          <p className="text-slate-deep/60 text-center py-12">
-            No categories available. Please check your data files.
-          </p>
-        )}
+              {!loading && categories.length === 0 && !error && (
+                <p className="text-slate-deep/60 text-center py-12">
+                  {t('discovery.noCategories')}
+                </p>
+              )}
       </motion.div>
     </Layout>
   )

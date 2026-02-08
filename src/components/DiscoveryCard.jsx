@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion'
 import { MapPin, Clock, DollarSign, Leaf, Info, ExternalLink } from 'lucide-react'
+import { useTranslation } from '../hooks/useTranslation'
 import CertificationLeaves from './CertificationLeaves'
 
 export default function DiscoveryCard({ entry, type }) {
+  const t = useTranslation()
   const { name, location, url, hours, fees, about, notes, local_sourcing, veg_vegan, certification, date, venue, category } = entry
 
   return (
@@ -90,13 +92,13 @@ export default function DiscoveryCard({ entry, type }) {
           {veg_vegan && (
             <div className="flex items-center gap-2 text-slate-deep/70 text-sm">
               <Leaf className="w-4 h-4 shrink-0 text-sage" />
-              <span>Veg/Vegan: {veg_vegan}</span>
+              <span>{t('chat.vegVegan')}: {veg_vegan}</span>
             </div>
           )}
           {certification && certification !== 'null' && (
             <div className="flex items-center gap-2 text-sage text-sm">
               <CertificationLeaves certification={certification} />
-              <span className="text-slate-deep/70">Green Plate Certified</span>
+              <span className="text-slate-deep/70">{t('chat.greenPlateCert')}</span>
             </div>
           )}
         </div>
@@ -111,7 +113,7 @@ export default function DiscoveryCard({ entry, type }) {
           className="inline-flex items-center gap-2 px-4 py-2 mt-3 rounded-xl bg-gradient-to-br from-sage to-sage-light text-white hover:from-sage-light hover:to-sage transition-all shadow-sm hover:shadow-md text-sm font-medium"
         >
           <MapPin className="w-4 h-4" />
-          <span>Find Location</span>
+          <span>{t('chat.findLocation')}</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       )}

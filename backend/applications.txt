@@ -32,28 +32,6 @@
       "contact": "78967979898",
       "license_url": "license_srv_gmail_com_a12f86ff.jpg",
       "status": "approved"
-    },
-    {
-      "id": "e52e7132-29c7-45eb-9312-e89752e817db",
-      "name": "vishwas",
-      "email": "vis@gmai.com",
-      "contact": "8723659327",
-      "category_file": "bakeries",
-      "biz_name": "demobakery",
-      "biz_cat": "Bakeries",
-      "biz_desc": "it's a real good bakery, make from eggs and vegan also available",
-      "license_url": "license_vis_gmai_com_8aaa09ff.jpg",
-      "status": "approved",
-      "location": "1234 bagot st.",
-      "hours": "Mon- Fri 10am to 5pm",
-      "local_sourcing": "yes",
-      "veg_vegan": "yes",
-      "green_plate_cert": "null",
-      "notes": "it's a real good bakery, make from eggs and vegan also available",
-      "store_name": "",
-      "hours_operation": "",
-      "info": "",
-      "shop_category": ""
     }
   ]
 }

@@ -1,0 +1,64 @@
+{
+  "common": {
+    "english": "English",
+    "french": "Français",
+    "adminLogin": "Connexion Admin",
+    "adminLogout": "Portail du Fondateur (Déconnexion)",
+    "openMenu": "Ouvrir le menu"
+  },
+  "home": {
+    "title": "Bienvenue sur, KingstonAI",
+    "subtitle": "Tourisme durable — produits locaux, lieux et activités",
+    "aiAssistant": "Assistant de voyage IA",
+    "placeholder": "Demandez des restaurants, des lieux, des événements...",
+    "suggestions": {
+      "bestRestaurants": "Meilleurs restaurants?",
+      "placesNearWater": "Lieux près de l'eau?",
+      "upcomingEvents": "Événements à venir?"
+    },
+    "emptyState": {
+      "title": "Demandez-moi des restaurants, des lieux à visiter, des événements ou planifiez votre voyage. Je vous aiderai à découvrir Kingston!",
+      "clearConversation": "Effacer la conversation"
+    },
+    "assistant": {
+      "title": "Assistant KingstonAI",
+      "subtitle": "Votre guide de voyage local"
+    }
+  },
+  "discovery": {
+    "title": "Découverte de Kingston",
+    "subtitle": "Explorez les restaurants locaux, les lieux à visiter et les événements à Kingston.",
+    "loadingCategories": "Chargement des catégories…",
+    "loadingData": "Chargement des données…",
+    "error": "Impossible de charger les données. Assurez-vous que l'API fonctionne sur http://localhost:8000",
+    "errorCategory": "Impossible de charger les données pour cette catégorie.",
+    "noEntries": "Aucune entrée trouvée dans cette catégorie.",
+    "noCategories": "Aucune catégorie disponible. Veuillez vérifier vos fichiers de données."
+  },
+  "chat": {
+    "findLocation": "Trouver l'emplacement",
+    "location": "Emplacement",
+    "hours": "Heures",
+    "about": "À propos",
+    "fees": "Frais",
+    "date": "Date",
+    "venue": "Lieu",
+    "notes": "Notes",
+    "vegVegan": "Végétarien/Végan",
+    "greenPlateCert": "Certification Green Plate",
+    "sections": {
+      "CAFÉS": "CAFÉS",
+      "RESTAURANTS": "RESTAURANTS",
+      "BAKERIES": "BOULANGERIES",
+      "BOULANGERIES": "BOULANGERIES",
+      "PUBS": "PUBS",
+      "SHOPS": "MAGASINS",
+      "MAGASINS": "MAGASINS",
+      "PLACES": "LIEUX",
+      "LIEUX": "LIEUX",
+      "EVENTS": "ÉVÉNEMENTS",
+      "ÉVÉNEMENTS": "ÉVÉNEMENTS"
+    }
+  }
+}
+

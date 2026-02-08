@@ -1,5 +1,7 @@
 // In dev, use same origin so Vite proxy forwards /api to backend (avoids CORS)
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
+// If VITE_API_URL is not set, use empty string to use Vite proxy
+// Otherwise use the explicit URL
+const API_BASE = import.meta.env.VITE_API_URL || ''
 
 const STORAGE_KEY = 'kingston_user'
 export const ADMIN_TOKEN_KEY = 'anang_admin_token'

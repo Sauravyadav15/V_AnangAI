@@ -75,6 +75,7 @@ class RegisterBody(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str
+    language: str = "en"  # Language code: "en" for English, "fr" for French
 
 
 class ApplicationIdBody(BaseModel):
@@ -760,7 +761,8 @@ def chat_endpoint(request: ChatRequest):
         if not question:
             raise HTTPException(status_code=400, detail="Question cannot be empty")
         
-        answer = ask(question)
+        language = request.language or "en"  # Default to English
+        answer = ask(question, language)
         
         if answer is None:
             raise HTTPException(

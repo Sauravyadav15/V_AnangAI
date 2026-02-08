@@ -1,0 +1,64 @@
+{
+  "common": {
+    "english": "English",
+    "french": "Français",
+    "adminLogin": "Admin Login",
+    "adminLogout": "Founder's Portal (Log out)",
+    "openMenu": "Open menu"
+  },
+  "home": {
+    "title": "Welcome to, KingstonAI",
+    "subtitle": "Sustainable tourism — local produce, places & activities",
+    "aiAssistant": "AI trip assistant",
+    "placeholder": "Ask about restaurants, places, events...",
+    "suggestions": {
+      "bestRestaurants": "Best restaurants?",
+      "placesNearWater": "Places near water?",
+      "upcomingEvents": "Upcoming events?"
+    },
+    "emptyState": {
+      "title": "Ask me about restaurants, places to visit, events, or plan your trip. I'll help you discover Kingston!",
+      "clearConversation": "Clear conversation"
+    },
+    "assistant": {
+      "title": "KingstonAI Assistant",
+      "subtitle": "Your local travel guide"
+    }
+  },
+  "discovery": {
+    "title": "Kingston Discovery",
+    "subtitle": "Explore local restaurants, places to visit, and events in Kingston.",
+    "loadingCategories": "Loading categories…",
+    "loadingData": "Loading data…",
+    "error": "Could not load data. Make sure the API is running on http://localhost:8000",
+    "errorCategory": "Could not load data for this category.",
+    "noEntries": "No entries found in this category.",
+    "noCategories": "No categories available. Please check your data files."
+  },
+  "chat": {
+    "findLocation": "Find Location",
+    "location": "Location",
+    "hours": "Hours",
+    "about": "About",
+    "fees": "Fees",
+    "date": "Date",
+    "venue": "Venue",
+    "notes": "Notes",
+    "vegVegan": "Veg/Vegan",
+    "greenPlateCert": "Green Plate Certification",
+    "sections": {
+      "CAFÉS": "CAFÉS",
+      "RESTAURANTS": "RESTAURANTS",
+      "BAKERIES": "BAKERIES",
+      "BOULANGERIES": "BAKERIES",
+      "PUBS": "PUBS",
+      "SHOPS": "SHOPS",
+      "MAGASINS": "SHOPS",
+      "PLACES": "PLACES",
+      "LIEUX": "PLACES",
+      "EVENTS": "EVENTS",
+      "ÉVÉNEMENTS": "EVENTS"
+    }
+  }
+}
+

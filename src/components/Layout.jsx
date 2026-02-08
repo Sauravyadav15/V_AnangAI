@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Menu, LogIn, LogOut, Shield } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useAdminAuth } from '../context/AdminAuthContext'
+import { useTranslation } from '../hooks/useTranslation'
 import Sidebar from './Sidebar'
+import LanguageToggle from './LanguageToggle'
 
 const logoImg = new URL('../../frontendimages/ANANG_logo.png', import.meta.url).href
 
@@ -19,6 +21,7 @@ export default function Layout({ children }) {
   const { toggleSidebar } = useApp()
   const { isAdmin, logout } = useAdminAuth()
   const navigate = useNavigate()
+  const t = useTranslation()
 
   const handleAdminLogout = () => {
     logout()
@@ -48,6 +51,7 @@ export default function Layout({ children }) {
           <span>AnangAI</span>
         </Link>
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           {isAdmin ? (
             <button
               type="button"
@@ -55,7 +59,7 @@ export default function Layout({ children }) {
               className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xl)] text-slate-deep hover:bg-white/60 transition-colors text-sm font-medium"
             >
               <LogOut className="w-4 h-4" />
-              Founder&apos;s Portal (Log out)
+              {t('common.adminLogout')}
             </button>
           ) : (
             <Link
@@ -63,7 +67,7 @@ export default function Layout({ children }) {
               className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-xl)] bg-sage text-white hover:bg-sage-light transition-colors text-sm font-medium"
             >
               <Shield className="w-4 h-4" />
-              Admin Login
+              {t('common.adminLogin')}
             </Link>
           )}
         </div>

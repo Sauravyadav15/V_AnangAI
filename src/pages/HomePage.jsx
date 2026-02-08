@@ -2,12 +2,14 @@ import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import Layout, { pageVariants, pageTransition } from '../components/Layout'
 import ChatInterface from '../components/ChatInterface'
+import { useTranslation } from '../hooks/useTranslation'
 
 const heroImage = new URL('../../frontendimages/Kingston City Hall Image 1.jpeg', import.meta.url).href
 
 const waveClipPath = 'polygon(0% 0%, 100% 0%, 100% 65%, 98% 72%, 94% 76%, 88% 80%, 80% 84%, 70% 87%, 55% 90%, 40% 88%, 25% 85%, 15% 82%, 8% 78%, 3% 72%, 0% 65%)'
 
 export default function HomePage() {
+  const t = useTranslation()
   return (
     <Layout>
       <motion.section
@@ -61,7 +63,7 @@ export default function HomePage() {
             transition={{ delay: 0.1, duration: 0.5 }}
           >
             <h1 className="font-[var(--font-serif)] text-4xl md:text-6xl lg:text-7xl font-bold text-slate-deep max-w-4xl leading-tight mx-auto">
-              Welcome to, AnangAI
+              {t('home.title')}
             </h1>
             <motion.p
               className="text-slate-deep/80 text-lg md:text-xl mt-3"
@@ -69,7 +71,7 @@ export default function HomePage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.25, duration: 0.4 }}
             >
-              Sustainable tourism — local produce, places & activities
+              {t('home.subtitle')}
             </motion.p>
           </motion.div>
 
@@ -90,7 +92,7 @@ export default function HomePage() {
             >
               <div className="flex items-center gap-2 text-slate-deep/70 mb-3">
                 <Search className="w-5 h-5 text-sage" />
-                <span className="text-sm font-medium">Your Local AI Assistant</span>
+                <span className="text-sm font-medium">{t('home.aiAssistant')}</span>
               </div>
               <ChatInterface />
             </div>
