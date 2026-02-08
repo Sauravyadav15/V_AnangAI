@@ -45,12 +45,17 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 git clone <repository-url>
-cd KingstonAssist### 2. Install Frontend Dependencies
+cd KingstonAssist
+### 2. Install Frontend Dependencies
 
-npm install### 3. Install Backend Dependencies
+npm install
+
+### 3. Install Backend Dependencies
 
 cd backend
-pip install -r requirements.txt### 4. Set Up Environment Variables
+pip install -r requirements.txt
+
+### 4. Set Up Environment Variables
 
 Create a `.env` file in the `backend` directory:
 h
@@ -58,7 +63,8 @@ cd backend
 touch .env
 Add your OpenRouter API key:
 
-OPENROUTER_API_KEY=your_api_key_here**Note**: You can get your API key from [OpenRouter](https://openrouter.ai/keys). If you don't set this, the code will use a fallback key (for development only).
+OPENROUTER_API_KEY=your_api_key_here
+**Note**: You can get your API key from [OpenRouter](https://openrouter.ai/keys). If you don't set this, the code will use a fallback key (for development only).
 
 ### 5. Verify Data Files
 
@@ -78,6 +84,7 @@ run.batThe backend will be available at `http://localhost:8000`
 ### Start the Frontend Development Server
 
 Open a **new terminal** and run:
-h
+
 npm run dev
+
 The frontend will be available at `http://localhost:5173`
