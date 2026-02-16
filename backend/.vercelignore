@@ -15,4 +15,11 @@ venv/
 *~
 uploads/*
 !uploads/.gitkeep
+# Exclude non-handler files from Vercel scanning
+main.py
+router.py
+extractallevent.py
+run.bat
+run.ps1
+webScraper/
 
