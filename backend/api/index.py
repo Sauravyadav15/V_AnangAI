@@ -6,16 +6,19 @@ import sys
 import os
 from pathlib import Path
 
-# Add parent directory to path so we can import main
+# Get the backend directory (parent of api/)
 backend_dir = Path(__file__).parent.parent
-sys.path.insert(0, str(backend_dir))
+backend_path = str(backend_dir)
 
-# Change working directory to backend for relative imports
-os.chdir(backend_dir)
+# Add backend directory to Python path
+sys.path.insert(0, backend_path)
 
-# Import FastAPI app
+# Change to backend directory for relative file paths
+os.chdir(backend_path)
+
+# Import the FastAPI app
 from main import app
 from mangum import Mangum
 
-# Create ASGI handler for Vercel
+# Create the ASGI handler - this is what Vercel will call
 handler = Mangum(app, lifespan="off")
