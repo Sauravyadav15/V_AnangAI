@@ -23,10 +23,23 @@ ADMINS = [
 ]
 ADMIN_TOKEN = "anang_founder_portal_token"
 
+# CORS configuration - allow localhost for dev and Vercel domains for production
+import os
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+]
+# Add Vercel frontend URL from environment variable if set
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+if FRONTEND_URL:
+    ALLOWED_ORIGINS.append(FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|.*\.vercel\.app)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
