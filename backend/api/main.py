@@ -4,6 +4,7 @@ AnangAI Civic Portal API - applications.txt (Get Featured) + Admin-only auth.
 import hashlib
 import json
 import shutil
+import sys
 import uuid
 from pathlib import Path
 
@@ -11,6 +12,12 @@ from fastapi import Body, Depends, FastAPI, File, Form, Header, HTTPException, Q
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+
+# Add parent directory to path so we can import router.py from backend root
+_backend_root = Path(__file__).resolve().parent.parent
+if str(_backend_root) not in sys.path:
+    sys.path.insert(0, str(_backend_root))
+
 from router import ask, discover_data_files, load_data, split_food_entries, split_place_entries, split_shops_entries, parse_food_entry, parse_place_entry, parse_shop_entry, parse_event_entry
 
 app = FastAPI(title="AnangAI Civic Portal API")
@@ -30,6 +37,7 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "https://v-anang-ai-65fc.vercel.app",  # No trailing slash - browsers send origin without it
 ]
 # Add Vercel frontend URL from environment variable if set
 FRONTEND_URL = os.getenv("FRONTEND_URL")
@@ -46,7 +54,8 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-BASE_DIR = Path(__file__).resolve().parent
+# BASE_DIR should point to backend root (parent of api/), not api/ directory
+BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "database.txt"
 # Get Featured submissions (name, email, business, status, etc.):
 APP_PATH = BASE_DIR / "applications.txt"
@@ -846,7 +855,6 @@ def get_discovery_data(category_id: str = Query(..., description="Category ID (f
     """
     try:
         data_files = discover_data_files()
-        BASE_DIR = Path(__file__).resolve().parent
         
         # Find the file
         found_file = None
@@ -914,6 +922,18 @@ def get_discovery_data(category_id: str = Query(..., description="Category ID (f
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load data: {str(e)}")
+
+
+@app.get("/")
+def root():
+    """Root endpoint - provides API information."""
+    return {
+        "message": "AnangAI Civic Portal API",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health",
+        "version": "1.0.0"
+    }
 
 
 @app.get("/health")

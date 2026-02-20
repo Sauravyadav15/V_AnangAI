@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Use same pattern as api.js - empty string uses Vite proxy, avoids CORS issues
+const API_BASE = import.meta.env.VITE_API_URL || ''
 
 /**
  * Hook for connecting to backend chat API.
@@ -15,7 +16,7 @@ export function useGemini() {
     setIsThinking(true)
     setError(null)
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chat`, {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
